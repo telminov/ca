@@ -9,3 +9,6 @@ def has_root_key(request):
 
 def no_root_key(request):
     return  render(request, 'ca/no_root_key.html')
+
+def login_page(request):
+    return render(request, 'ca/login_page.html')
