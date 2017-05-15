@@ -1,3 +1,6 @@
 from django.db import models
 
-# Create your models here.
+
+class RootCrt(models.Model):
+    key = models.FileField(upload_to='root/')
+    crt = models.FileField(upload_to='root/')
