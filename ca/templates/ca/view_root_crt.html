@@ -11,17 +11,17 @@
                 <h2 class="intro-text text-center">Root .crt file fields</h2>
                 <hr>
                 <hr class="visible-xs">
-                <div class="well">County: {{ C.C }}</div>
-                <div class="well">State: {{ C.ST }}</div>
-                <div class="well">Location: {{ C.L }}</div>
-                <div class="well">Organization: {{ C.O }}</div>
-                <div class="well">OrgUnitName: {{ C.OU }}</div>
-                <div class="well">CommonName: {{ C.CN }}</div>
-                <div class="well">Email: {{ C.emailAddress }}</div>
+                <div class="well">County: {% if C.C %}{{ C.C }}{% endif %}</div>
+                <div class="well">State: {% if C.ST %}{{ C.ST }}{% endif %}</div>
+                <div class="well">Location: {% if C.L %}{{ C.L }}{% endif %}</div>
+                <div class="well">Organization: {% if C.O %}{{ C.O }}{% endif %}</div>
+                <div class="well">OrgUnitName: {% if C.OU %}{{ C.OU }}{% endif %}</div>
+                <div class="well">CommonName: {% if C.CN %}{{ C.CN }}{% endif %}</div>
+                <div class="well">Email: {% if C.emailAddress %}{{ C.emailAddress }}{% endif %}</div>
                 <form action="" method="post">
                     {% csrf_token %}
-                    <a href="{% url 'index' %}" role="button" class="btn btn-default">Submit</a>
-                    <button type="submit">Cancel</button>
+                    <a href="{% url 'index' %}" role="button" class="btn btn-success">Submit</a>
+                    <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
         </div>
