@@ -1,4 +1,5 @@
 {% extends 'ca/base.html' %}
+{% load bootstrap3 %}
 
 {% block title %}Root key uploading{% endblock %}
 
@@ -11,13 +12,9 @@
                 <h2 class="intro-text text-center">Upload an existing root certificate and a key</h2>
                 <hr>
                 <hr class="visible-xs">
-                <form class="has-root-key-form">
-                    <label class="btn btn-default btn-file">
-                        Browse certificate .crt<input type="file" style="display: none;">
-                    </label>
-                    <label class="btn btn-default btn-file">
-                        Browse root key .key<input type="file" style="display: none;">
-                    </label>
+                <form enctype="multipart/form-data" class="has-root-key-form" method="post">
+                    {% csrf_token %}
+                    {% bootstrap_form form %}
                     <button type="submit" class="btn btn-default">Submit</button>
                 </form>
             </div>
