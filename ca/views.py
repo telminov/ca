@@ -1,6 +1,7 @@
 from OpenSSL import crypto
 
 from django.http import HttpResponseRedirect
+from django.template.response import TemplateResponse
 from django.urls import reverse_lazy
 from django.utils.encoding import force_text
 from django.views.generic import TemplateView, CreateView, DeleteView, FormView
@@ -10,12 +11,19 @@ from ca import forms
 from ca import models
 
 
-# Запилить миксин, который проверяет существование сертификата рута, если он есть грузить заглушку
-class IndexRootCrt(TemplateView):
+class RootAlreadyExist(object):
+    def render_to_response(self, context, **response_kwargs):
+        if models.RootCrt.objects.first():
+            return TemplateResponse(request=self.request, template='ca/root_already_exists.html')
+        else:
+            return super().render_to_response(context, **response_kwargs)
+
+
+class IndexRootCrt(RootAlreadyExist, TemplateView):
     template_name = 'ca/index.html'
 
 
-class LoadRootCrt(CreateView):
+class LoadRootCrt(RootAlreadyExist, CreateView):
     form_class = forms.RootCrt
     template_name = 'ca/has_root_key.html'
     success_url = reverse_lazy('view_root_crt')
@@ -40,7 +48,7 @@ class ViewRootCrt(TemplateView):
         return context
 
 
-class GenerateRootCrt(FormView):
+class GenerateRootCrt(RootAlreadyExist, FormView):
     form_class = forms.ConfigRootCrt
     template_name = 'ca/no_root_key.html'
     success_url = reverse_lazy('view_root_crt')
