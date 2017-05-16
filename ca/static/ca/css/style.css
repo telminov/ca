@@ -197,3 +197,7 @@ footer p {
 .has-root-key-form {
     margin-left: 31%;
 }
+
+.hidden-input-field {
+    display: none;
+}

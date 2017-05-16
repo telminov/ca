@@ -14,7 +14,9 @@
                 <hr class="visible-xs">
                 <form enctype="multipart/form-data" class="has-root-key-form" method="post">
                     {% csrf_token %}
-                    {% bootstrap_form form %}
+                    {% bootstrap_form_errors form type="non_fields" %}
+                    {% bootstrap_field form.key label_class="btn btn-default btn-file" field_class="hidden-input-field" %}
+                    {% bootstrap_field form.crt label_class="btn btn-default btn-file" field_class="hidden-input-field" %}
                     <button type="submit" class="btn btn-default">Submit</button>
                 </form>
             </div>

@@ -7,6 +7,8 @@ from ca.utils import create_self_signed_cert_root
 from ca import forms
 from ca import models
 
+from django.shortcuts import render
+
 
 # Запилить миксин, который проверяет существование сертификата рута, если он есть грузить заглушку
 class IndexRootCrt(TemplateView):
@@ -47,3 +49,7 @@ class GenerateRootCrt(FormView):
     def form_valid(self, form):
         create_self_signed_cert_root(form.cleaned_data)
         return super(GenerateRootCrt, self).form_valid(form)
+
+
+def root_already_exists(request):
+    return render(request, 'ca/root_already_exists.html')
