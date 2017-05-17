@@ -5,8 +5,8 @@ from django.conf import settings
 
 from ca import models
 
-KEY_FILE = os.path.join(settings.ROOT_CA, 'rootCA.key')
-CERT_FILE = os.path.join(settings.ROOT_CA, 'rootCA.crt')
+KEY_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.key')
+CERT_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.crt')
 
 
 def create_self_signed_cert_root(cleanned_data):
@@ -32,16 +32,16 @@ def create_self_signed_cert_root(cleanned_data):
     cert.set_pubkey(k)
     cert.sign(k, 'sha1')
 
-    with open(CERT_FILE, 'wb') as f:
+    key_path = os.path.join(settings.MEDIA_ROOT, KEY_FILE)
+    cert_path = os.path.join(settings.MEDIA_ROOT, CERT_FILE)
+
+    with open(cert_path, 'wb') as f:
         f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
 
-    with open(KEY_FILE, 'wb') as f:
+    with open(key_path, 'wb') as f:
         f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
 
-    path_key, name_key = os.path.join(KEY_FILE)
-    path_crt, name_crt = os.path.join(CERT_FILE)
-
     models.RootCrt.objects.create(
-        key=os.path.join(os.path.dirname(path_key), name_key),
-        crt=os.path.join(os.path.dirname(path_crt), name_crt)
+        key=KEY_FILE,
+        crt=CERT_FILE
     )

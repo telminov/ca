@@ -10,7 +10,7 @@ class RootCrt(forms.ModelForm):
 
 
 class ConfigRootCrt(forms.Form):
-    country = forms.CharField()
+    country = forms.CharField(max_length=2)
     state = forms.CharField()
     location = forms.CharField()
     organization = forms.CharField()

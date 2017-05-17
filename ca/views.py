@@ -41,14 +41,10 @@ class ViewRootCrt(DetailView):
         return get_object_or_404(self.model)
 
     def get_context_data(self, **kwargs):
-        context = super(ViewRootCrt, self).get_context_data(**kwargs)
-
-        cert_path = os.path.join(settings.MEDIA_ROOT, str(models.RootCrt.objects.first().crt))
-        st_cert = open(cert_path, 'rt').read()
-        cert = crypto.load_certificate(crypto.FILETYPE_PEM, st_cert)
-
-        context['C'] = cert.get_subject()
-        return context
+        with open(self.object.crt.path, 'rt') as cert:
+            cert_data = cert.read().encode()
+            kwargs['cert'] = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
+        return super().get_context_data(**kwargs)
 
 
 class RootCrtDelete(DeleteView):
@@ -60,11 +56,11 @@ class RootCrtDelete(DeleteView):
         return get_object_or_404(self.model)
 
     def delete(self, request, *args, **kwargs):
-        super().delete(request, *args, **kwargs)
-        directory = os.listdir(settings.ROOT_CA)
+        path_root_dir = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)
+        directory = os.listdir(path_root_dir)
         for file in directory:
-            os.remove(os.path.join(settings.ROOT_CA, file))
-        return HttpResponseRedirect(self.success_url)
+            os.remove(os.path.join(path_root_dir, file))
+        return super().delete(request, *args, **kwargs)
 
 
 class GenerateRootCrt(CertExistMixin, FormView):
