@@ -1,0 +1,10 @@
+{% extends 'ca/base.html' %}
+
+{% block content %}
+
+    <form method="post">
+    {% csrf_token %}
+        <button type="submit">Delete</button>
+    </form>
+
+{% endblock %}

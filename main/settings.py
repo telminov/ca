@@ -129,6 +129,7 @@ LOGIN_URL = '/login/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+ROOT_CA = os.path.join(MEDIA_ROOT, 'root')
 
 try:
     from main.local_settings import *
