@@ -179,11 +179,17 @@ footer p {
 
     .navbar-nav {
         display: table;
-        float: none;
-        margin: 0 auto;
+        float: left;
         table-layout: fixed;
         font-size: 1.25em;
+        width: 100%;
     }
+
+    .navbar-nav>li:last-child {
+        float: right;
+        width: 20%;
+    }
+
 }
 
 @media screen and (min-width:1200px) {
