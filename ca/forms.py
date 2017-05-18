@@ -7,7 +7,10 @@ class RootCrt(forms.ModelForm):
     class Meta:
         model = models.RootCrt
         fields = ('key', 'crt')
-
+        labels = {
+            'key' : 'root .key file',
+            'crt' : 'root .crt file'
+        }
 
 class ConfigRootCrt(forms.Form):
     country = forms.CharField(max_length=2)

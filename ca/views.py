@@ -3,7 +3,7 @@ from OpenSSL import crypto
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView
 
@@ -20,22 +20,22 @@ class CertExistMixin:
 
 
 class CrtExist(TemplateView):
-    template_name = 'ca/root_already_exists.html'
+    template_name = 'ca/root_crt_managing/root_already_exists.html'
 
 
 class IndexRootCrt(CertExistMixin, TemplateView):
-    template_name = 'ca/index.html'
+    template_name = 'ca/root_crt_managing/index.html'
 
 
 class LoadRootCrt(CertExistMixin, CreateView):
     form_class = forms.RootCrt
-    template_name = 'ca/has_root_key.html'
+    template_name = 'ca/root_crt_managing/has_root_key.html'
     success_url = reverse_lazy('view_root_crt')
 
 
 class ViewRootCrt(DetailView):
     model = models.RootCrt
-    template_name = 'ca/view_root_crt.html'
+    template_name = 'ca/root_crt_managing/view_root_crt.html'
 
     def get_object(self, queryset=None):
         return get_object_or_404(self.model)
@@ -49,7 +49,7 @@ class ViewRootCrt(DetailView):
 
 class RootCrtDelete(DeleteView):
     model = models.RootCrt
-    template_name = 'ca/delete_root.html'
+    template_name = 'ca/root_crt_managing/delete_root.html'
     success_url = reverse_lazy('index')
 
     def get_object(self, queryset=None):
@@ -65,9 +65,13 @@ class RootCrtDelete(DeleteView):
 
 class GenerateRootCrt(CertExistMixin, FormView):
     form_class = forms.ConfigRootCrt
-    template_name = 'ca/no_root_key.html'
+    template_name = 'ca/root_crt_managing/no_root_key.html'
     success_url = reverse_lazy('view_root_crt')
 
     def form_valid(self, form):
         create_self_signed_cert_root(form.cleaned_data)
         return super(GenerateRootCrt, self).form_valid(form)
+
+
+def indexPage(request):
+    return render(request, 'ca/index.html')

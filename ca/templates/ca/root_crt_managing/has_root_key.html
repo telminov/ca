@@ -12,12 +12,13 @@
                 <h2 class="intro-text text-center">Upload an existing root certificate and a key</h2>
                 <hr>
                 <hr class="visible-xs">
-                <form enctype="multipart/form-data" class="has-root-key-form" method="post">
+                <form enctype="multipart/form-data" method="post">
                     {% csrf_token %}
-                    {% bootstrap_form_errors form type="non_fields" %}
-                    {% bootstrap_field form.key label_class="btn btn-default btn-file" field_class="hidden-input-field" %}
-                    {% bootstrap_field form.crt label_class="btn btn-default btn-file" field_class="hidden-input-field" %}
+                    <div class="text-center">
+                    {% bootstrap_field form.key label_class="btn btn-default btn-file" field_class="hidden-input-field" form_group_class="has-root-key-form" %}
+                    {% bootstrap_field form.crt label_class="btn btn-default btn-file" field_class="hidden-input-field" form_group_class="has-root-key-form" %}
                     <button type="submit" class="btn btn-default">Submit</button>
+                    </div>
                 </form>
             </div>
         </div>
