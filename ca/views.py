@@ -75,3 +75,7 @@ class GenerateRootCrt(CertExistMixin, FormView):
 
 def indexPage(request):
     return render(request, 'ca/index.html')
+
+
+def create_crt(request):
+    return render(request, 'ca/create_crt.html')

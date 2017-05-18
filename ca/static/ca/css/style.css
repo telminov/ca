@@ -201,3 +201,9 @@ footer p {
 .has-root-key-form {
     display: inline-block;
 }
+
+.main-table td,th {
+    text-align: center;
+    border-top: 1px solid #999999 !important;
+}
+
