@@ -185,6 +185,11 @@ footer p {
         width: 100%;
     }
 
+    .navbar-nav>li:nth-child(2) {
+        display: inline-block;
+        width: 40%;
+    }
+
     .navbar-nav>li:last-child {
         float: right;
         width: 20%;
@@ -211,5 +216,9 @@ footer p {
 .main-table td,th {
     text-align: center;
     border-top: 1px solid #999999 !important;
+}
+
+.cn-search {
+    margin-bottom: 2rem;
 }
 

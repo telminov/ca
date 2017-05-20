@@ -130,6 +130,8 @@ LOGIN_EXEMPT_URLS = (
     r'/admin/'
 )
 
+BRAND_NAME = 'Your company name'
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -139,3 +141,4 @@ try:
     from main.local_settings import *
 except ImportError:
     print("Warning: no local_settings.py")
+

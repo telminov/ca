@@ -13,8 +13,7 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li><a href="{% url 'index' %}">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="blog.html">Blog</a></li>
+                <li>{% if object.crt.url %}<a href="{{ object.crt.url }}" style="display: inline-block">Download root certificate .crt</a>{% endif %}</li>
                 {% if user.is_authenticated %}
                     <li>Hello, <strong style="display: inline-block">{{ user.get_username }}</strong><a href="{% url 'logout' %}" style="display: inline-block">Logout</a></li>
                 {% else %}
