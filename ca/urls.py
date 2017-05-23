@@ -8,8 +8,9 @@ urlpatterns = [
     url(r'^view_root_crt/$', views.ViewRootCrt.as_view(), name='view_root_crt'),
     url(r'^no_root_key/$', views.GenerateRootCrt.as_view(), name='no_root_key'),
     url(r'^root_exist/$', views.CrtExist.as_view(), name='root_crt_exist'),
+    url(r'^root_not_exist/$', views.CrtNotExist.as_view(), name='root_crt_not_exist'),
     url(r'^delete_root_crt/$', views.RootCrtDelete.as_view(), name='delete_root_crt'),
-    url(r'^$', views.indexPage, name='index'),
-    url(r'^create_crt/$', views.create_crt, name='create_crt')
+    url(r'^$', views.SearchSiteCrt.as_view(), name='index'),
+    url(r'^create_crt/$', views.CreateSiteCrt.as_view(), name='create_crt')
 
 ]

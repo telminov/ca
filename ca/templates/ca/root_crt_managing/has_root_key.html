@@ -12,6 +12,7 @@
                 <h2 class="intro-text text-center">Upload an existing root certificate and a key</h2>
                 <hr>
                 <hr class="visible-xs">
+                {% bootstrap_form_errors form %}
                 <form enctype="multipart/form-data" method="post">
                     {% csrf_token %}
                     <div class="text-center">

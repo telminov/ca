@@ -19,7 +19,7 @@
                 <div class="well">CommonName: {% if cert.CN %}{{ cert.CN }}{% endif %}</div>
                 <div class="well">Email: {% if cert.emailAddress %}{{ cert.emailAddress }}{% endif %}</div>
                 <div class="text-center">
-                    <a href="{% url 'index_root' %}" role="button" class="btn btn-success">Submit</a>
+                    <a href="{% url 'index' %}" role="button" class="btn btn-success">Submit</a>
                     <a href="{% url 'delete_root_crt' %}" role="button" class="btn btn-danger">Delete</a>
                 </div>
             </div>
