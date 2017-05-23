@@ -89,19 +89,20 @@ CA_CERT_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.crt')
 
 class CA:
 
-    def generate_root_certificate(self, cleanned_data):
+    def generate_root_certificate(self, data):
         pkey = self.create_key_pair()
-        cert = self.create_cert_root(pkey, **cleanned_data)
+        cert = self.create_cert_root(pkey, data)
         self.write_cert_root(cert, pkey)
-        self.create_model_root_crt(cleanned_data)
+        self.create_model_root_crt(data)
 
     def generate_site_certificate(self, cn):
         pkey = self.create_key_pair()
-        cert = self.create_cert_site(pkey, **self.generate_dict(cn))
+        cert = self.create_cert_site(pkey, self.generate_dict(cn))
         self.write_cert_site(cert, pkey, cn)
         self.create_model_site_crt(cn)
 
-    def generate_dict(self, cn):
+    @staticmethod
+    def generate_dict(cn):
         root = models.RootCrt.objects.first()
         options = {
             'C': root.country,
@@ -110,11 +111,12 @@ class CA:
             'O': root.organization,
             'OU': root.organizational_unit_name,
             'CN': cn,
-            'emailAddres': root.email,
+            'emailAddress': root.email,
         }
         return options
 
-    def create_key_pair(self):
+    @staticmethod
+    def create_key_pair():
         pkey = crypto.PKey()
         pkey.generate_key(crypto.TYPE_RSA, 2048)
         return pkey
@@ -134,7 +136,8 @@ class CA:
     #     req.sign(ca_key, 'sha256')
     #     return req
 
-    def create_cert_site(self, pkey, **data):
+    @staticmethod
+    def create_cert_site(pkey, data):
         with open(os.path.join(settings.MEDIA_ROOT, CA_CERT_FILE)) as f:
             ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, f.read())
 
@@ -160,11 +163,12 @@ class CA:
         cert.sign(ca_key, 'sha256')
         return cert
 
-    def create_cert_root(self, pkey, **name):
+    @staticmethod
+    def create_cert_root(pkey, date):
         cert = crypto.X509()
         subj = cert.get_subject()
 
-        for key, value in name.items():
+        for key, value in date.items():
             if value != '':
                 setattr(subj, key, value)
 
@@ -175,7 +179,8 @@ class CA:
         cert.sign(pkey, 'sha256')
         return cert
 
-    def write_cert_root(self, cert, key):
+    @staticmethod
+    def write_cert_root(cert, key):
         key_path = os.path.join(settings.MEDIA_ROOT, CA_KEY_FILE)
         cert_path = os.path.join(settings.MEDIA_ROOT, CA_CERT_FILE)
 
@@ -188,7 +193,8 @@ class CA:
         with open(key_path, 'wb') as f:
             f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key))
 
-    def write_cert_site(self, cert, key, cn):
+    @staticmethod
+    def write_cert_site(cert, key, cn):
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
             os.mkdir(os.path.join(settings.MEDIA_ROOT, cn))
 
@@ -198,19 +204,21 @@ class CA:
         with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.key'), 'wb') as f:
             f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key))
 
-    def create_model_root_crt(self, cleanned_data):
+    @staticmethod
+    def create_model_root_crt(data):
         models.RootCrt.objects.create(
             key=CA_KEY_FILE,
             crt=CA_CERT_FILE,
-            country=cleanned_data['C'],
-            state=cleanned_data['ST'],
-            location=cleanned_data['L'],
-            organization=cleanned_data['O'],
-            organizational_unit_name=cleanned_data['OU'],
-            email=cleanned_data['emailAddress']
+            country=data['C'],
+            state=data['ST'],
+            location=data['L'],
+            organization=data['O'],
+            organizational_unit_name=data['OU'],
+            email=data['emailAddress']
         )
 
-    def create_model_site_crt(self, cn):
+    @staticmethod
+    def create_model_site_crt(cn):
         models.SiteCrt.objects.create(
             key=os.path.join(cn, cn + '.key'),
             crt=os.path.join(cn, cn + '.crt'),

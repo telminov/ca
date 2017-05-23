@@ -7,7 +7,6 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView, ListView
 from django.views.generic.edit import FormMixin
-from django.db.models.query import EmptyQuerySet
 
 from ca.utils import CA
 from ca import forms
@@ -17,14 +16,14 @@ from ca import models
 class CertRootExistMixin:
     def get(self, request, *args, **kwargs):
         if models.RootCrt.objects.exists():
-            return HttpResponseRedirect(reverse_lazy('root_crt_exist'))
+            return HttpResponseRedirect(reverse_lazy('root_crt_exists'))
         return super().get(request, *args, **kwargs)
 
 
 class CertRootNotExistMixin:
     def get(self, request, *args, **kwargs):
         if models.RootCrt.objects.all().count() == 0:
-            return HttpResponseRedirect(reverse_lazy('root_crt_not_exist'))
+            return HttpResponseRedirect(reverse_lazy('root_crt_not_exists'))
         return super().get(request, *args, **kwargs)
 
 
@@ -44,10 +43,6 @@ class LoadRootCrt(CertRootExistMixin, CreateView):
     form_class = forms.RootCrt
     template_name = 'ca/root_crt_managing/has_root_key.html'
     success_url = reverse_lazy('view_root_crt')
-
-    def form_valid(self, form):
-        self.object = form.save()
-        return HttpResponseRedirect(self.get_success_url())
 
 
 class ViewRootCrt(DetailView):
