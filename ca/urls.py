@@ -11,6 +11,8 @@ urlpatterns = [
     url(r'^root_not_exists/$', views.CrtNotExist.as_view(), name='root_crt_not_exists'),
     url(r'^delete_root_crt/$', views.RootCrtDelete.as_view(), name='delete_root_crt'),
     url(r'^$', views.SearchSiteCrt.as_view(), name='index'),
-    url(r'^create_crt/$', views.CreateSiteCrt.as_view(), name='create_crt')
+    url(r'^create_crt/$', views.CreateSiteCrt.as_view(), name='create_crt'),
+    url(r'^upload_existing/$', views.upload_existing, name='upload_existing'),
+    url(r'^view_crt/$', views.view_crt, name='view_crt')
 
 ]

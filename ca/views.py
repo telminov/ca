@@ -3,7 +3,7 @@ from OpenSSL import crypto
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView, ListView
 from django.views.generic.edit import FormMixin
@@ -114,3 +114,11 @@ class CreateSiteCrt(CertRootNotExistMixin, FormView):
         ca = CA()
         ca.generate_site_certificate(form.cleaned_data['cn'])
         return super().form_valid(form)
+
+
+def upload_existing(request):
+    return render(request, 'ca/upload_existing.html')
+
+
+def view_crt(request):
+    return render(request, 'ca/view_crt.html')

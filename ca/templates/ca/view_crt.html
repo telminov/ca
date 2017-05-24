@@ -1,0 +1,67 @@
+{% extends 'ca/base.html' %}
+
+{% block title %}View certificate file{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="box">
+            <div class="col-lg-12">
+                <hr>
+                <h2 class="intro-text text-center">Certification file fields</h2>
+                <hr>
+                <hr class="visible-xs">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" id="view-crt-file">
+                  View crt and key files text
+                </button>
+
+                <div class="pull-right">
+                    <a href="#" class="btn btn-default">Re-creation</a>
+                    <a href="{% url 'delete_root_crt' %}" role="button" class="btn btn-danger">Delete</a>
+                </div>
+
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                      </div>
+                      <div class="modal-body">
+                        <div id="crt-file-text">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="crt" value="lolkek">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" id="copy-to-clipboard" data-clipboard-target="#crt"><i class="glyphicon glyphicon glyphicon-copy"></i></button>
+                               </span>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="key" value="lolkek">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-default" id="copy-to-clipboard" data-clipboard-target="#key"><i class="glyphicon glyphicon glyphicon-copy"></i></button>
+                               </span>
+                            </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="well">County: {% if cert.C %}{{ cert.C }}{% endif %}</div>
+                <div class="well">State: {% if cert.ST %}{{ cert.ST }}{% endif %}</div>
+                <div class="well">Location: {% if cert.L %}{{ cert.L }}{% endif %}</div>
+                <div class="well">Organization: {% if cert.O %}{{ cert.O }}{% endif %}</div>
+                <div class="well">OrgUnitName: {% if cert.OU %}{{ cert.OU }}{% endif %}</div>
+                <div class="well">CommonName: {% if cert.CN %}{{ cert.CN }}{% endif %}</div>
+                <div class="well">Email: {% if cert.emailAddress %}{{ cert.emailAddress }}{% endif %}</div>
+                <div class="text-center">
+                    <a href="{% url 'index' %}" role="button" class="btn btn-success">Submit</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

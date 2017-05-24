@@ -192,7 +192,6 @@ footer p {
 
     .navbar-nav>li:last-child {
         float: right;
-        width: 20%;
     }
 
 }
@@ -220,5 +219,17 @@ footer p {
 
 .cn-search {
     margin-bottom: 2rem;
+}
+
+.control-label {
+    margin-right: 1rem;
+}
+
+#view-crt-file {
+    margin-bottom: 3rem;
+}
+
+#myModal .input-group {
+    margin-bottom: 1rem;
 }
 
