@@ -85,4 +85,50 @@ class SearchSiteCrt(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['cn'].label = 'Common Name'
+        self.fields['cn'].label = 'Common name'
+
+
+class SiteCrt(forms.Form):
+    crt_file = forms.FileField(required=False)
+    key_file = forms.FileField(required=False)
+    crt_text = forms.CharField(widget=forms.Textarea, required=False)
+    key_text = forms.CharField(widget=forms.Textarea, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['crt_file'].label = '.crt file'
+        self.fields['key_file'].label = '.key file'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        crt_file = cleaned_data.get('crt_file')
+        key_file = cleaned_data.get('key_file')
+        crt_text = cleaned_data.get('crt_text')
+        key_text = cleaned_data.get('key_text')
+        if not ((crt_file and key_file) or (crt_text and key_text)):
+            msg = 'Please fill at least 2 fields(files or text)'
+            if crt_file or key_file:
+                self.add_error('crt_file', msg)
+            if crt_text or key_text:
+                self.add_error('crt_text', msg)
+        if crt_file:
+            crt_file_data = crt_file.read()
+            crt_file.seek(0)
+            cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_file_data)
+            try:
+                obj_crt_in_db = models.SiteCrt.objects.get(cn=cert.get_subject().CN)
+                if obj_crt_in_db:
+                    msg = 'Certificate with Common name already exists in db'
+                    self.add_error('crt_file', msg)
+            except ObjectDoesNotExist:
+                pass
+        if crt_text:
+            cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_text)
+            try:
+                obj_crt_in_db = models.SiteCrt.objects.get(cn=cert.get_subject().CN)
+                if obj_crt_in_db:
+                    msg = 'Certificate with Common name already exists in db'
+                    self.add_error('crt_text', msg)
+            except ObjectDoesNotExist:
+                pass
+        return cleaned_data

@@ -33,7 +33,7 @@
                     </tr>
                     {% for x in object_list %}
                     <tr>
-                        <td>{{ x.cn }}</td>
+                        <td><a href="{% url 'view_crt' pk=x.pk %}">{{ x.cn }}</a></td>
                         <td>{{ x.date_start }}</td>
                         <td>{{ x.date_end }}</td>
                     </tr>

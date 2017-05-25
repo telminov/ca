@@ -1,4 +1,5 @@
 {% extends 'ca/base.html' %}
+{% load bootstrap3 %}
 
 {% block title %}Upload existing key and crt{% endblock %}
 
@@ -12,39 +13,45 @@
                 <hr>
                 <hr class="visible-xs">
                 <p class="text-center">
-                    <a href="#" class="btn btn-default" id="files-upload">Upload via files</a>
-                    <a href="#" class="btn btn-default" id="textareas-upload">Upload via textareas</a>
+                    <a class="btn btn-default" id="files-upload">Upload via files</a>
+                    <a class="btn btn-default" id="textareas-upload">Upload via textareas</a>
                 </p>
 
-                <form class="form" method="post">
+                <form enctype="multipart/form-data" class="form" method="post">
+                    {% csrf_token %}
+                    {% bootstrap_form_errors form %}
                     <div id="first-input-button" style="display: none">
-                        <div class="form-group col-sm-6 text-center">
-                            <label class="btn btn-default btn-file">
-                                Browse key file<input type="file" style="display: none">
-                            </label>
-                        </div>
+                        {% bootstrap_field form.crt_file label_class="btn btn-default btn-file" field_class="hidden-input-field" %}
+{#                        <div class="form-group col-sm-6 text-center">#}
+{#                            <label class="btn btn-default btn-file">#}
+{#                                Browse key file<input type="file" style="display: none">#}
+{#                            </label>#}
+{#                        </div>#}
                     </div>
 
                     <div id="second-input-button" style="display: none">
-                        <div class="form-group col-sm-6 text-center">
-                            <label class="btn btn-default btn-file">
-                                Browse crt file<input type="file" style="display: none">
-                            </label>
-                        </div>
+                        {% bootstrap_field form.key_file label_class="btn btn-default btn-file" field_class="hidden-input-field" %}
+{#                        <div class="form-group col-sm-6 text-center">#}
+{#                            <label class="btn btn-default btn-file">#}
+{#                                Browse crt file<input type="file" style="display: none">#}
+{#                            </label>#}
+{#                        </div>#}
                     </div>
 
                     <div id="first-textarea" style="display: none">
-                        <div class="form-group col-sm-6 text-center">
-                          <label for="key">Key input:</label>
-                          <textarea class="form-control" rows="5" id="key"></textarea>
-                        </div>
+                        {% bootstrap_field form.crt_text %}
+{#                        <div class="form-group col-sm-6 text-center">#}
+{#                          <label for="key">Key input:</label>#}
+{#                          <textarea class="form-control" rows="5" id="key"></textarea>#}
+{#                        </div>#}
                     </div>
 
                     <div id="second-textarea" style="display: none">
-                        <div class="form-group col-sm-6 text-center">
-                          <label for="crt">Crt input:</label>
-                          <textarea class="form-control" rows="5" id="crt"></textarea>
-                        </div>
+                        {% bootstrap_field form.key_text %}
+{#                        <div class="form-group col-sm-6 text-center">#}
+{#                          <label for="crt">Crt input:</label>#}
+{#                          <textarea class="form-control" rows="5" id="crt"></textarea>#}
+{#                        </div>#}
                     </div>
 
                     <div class="form-group text-center">

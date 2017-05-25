@@ -17,4 +17,16 @@ $(document).ready(function () {
 
    new Clipboard('#copy-to-clipboard');
 
+   $('#view-crt-file').click(function () {
+       $.ajax({
+           type: 'GET',
+           dataType: 'json',
+           data: {'pk': document.URL.split('/')[4]},
+           success: function (data) {
+               $('#crt').val(data['crt'].replace('\\n', String.fromCharCode(13, 10)));
+               $('#key').val(data['key']);
+           }
+       })
+   })
+
 });

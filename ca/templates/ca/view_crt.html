@@ -17,7 +17,7 @@
 
                 <div class="pull-right">
                     <a href="#" class="btn btn-default">Re-creation</a>
-                    <a href="{% url 'delete_root_crt' %}" role="button" class="btn btn-danger">Delete</a>
+                    <a href="{% url 'delete_crt' pk=object.pk %}" role="button" class="btn btn-danger">Delete</a>
                 </div>
 
                 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -30,13 +30,13 @@
                       <div class="modal-body">
                         <div id="crt-file-text">
                             <div class="input-group">
-                                <input type="text" class="form-control" id="crt" value="lolkek">
+                                <textarea class="form-control" id="crt" cols="60" rows="11"></textarea>
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" id="copy-to-clipboard" data-clipboard-target="#crt"><i class="glyphicon glyphicon glyphicon-copy"></i></button>
                                </span>
                             </div>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="key" value="lolkek">
+                                <textarea class="form-control" id="key" cols="60" rows="11"></textarea>
                                 <span class="input-group-btn">
                                     <button class="btn btn-default" id="copy-to-clipboard" data-clipboard-target="#key"><i class="glyphicon glyphicon glyphicon-copy"></i></button>
                                </span>
