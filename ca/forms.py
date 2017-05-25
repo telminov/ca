@@ -43,31 +43,19 @@ class RootCrt(forms.ModelForm):
 
 
 class ConfigRootCrt(forms.Form):
-    C = forms.CharField(max_length=2)
-    ST = forms.CharField()
-    L = forms.CharField()
-    O = forms.CharField()
-    OU = forms.CharField(required=False)
-    CN = forms.CharField()
-    emailAddress = forms.EmailField(required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['C'].label = 'Country'
-        self.fields['ST'].label = 'State'
-        self.fields['L'].label = 'Location'
-        self.fields['O'].label = 'Organization'
-        self.fields['OU'].label = 'Organizational_unit_name'
-        self.fields['CN'].label = 'Common name'
-        self.fields['emailAddress'].label = 'Email'
+    C = forms.CharField(max_length=2, label='Country')
+    ST = forms.CharField(label='State')
+    L = forms.CharField(label='Location')
+    O = forms.CharField(label='Organization')
+    OU = forms.CharField(required=False, label='Organizational_unit_name')
+    CN = forms.CharField(label='Common name')
+    emailAddress = forms.EmailField(required=False, label='Email')
+    validity_period = forms.DateField(label='Certificate expiration date')
 
 
 class CreateSiteCrt(forms.Form):
-    cn = forms.CharField(required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['cn'].label = 'Common name'
+    cn = forms.CharField(required=False, label='Common name')
+    validity_period = forms.DateField(label='Certificate expiration date')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -81,23 +69,14 @@ class CreateSiteCrt(forms.Form):
 
 
 class SearchSiteCrt(forms.Form):
-    cn = forms.CharField(required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['cn'].label = 'Common name'
+    cn = forms.CharField(required=False, label='Common name')
 
 
 class SiteCrt(forms.Form):
-    crt_file = forms.FileField(required=False)
-    key_file = forms.FileField(required=False)
-    crt_text = forms.CharField(widget=forms.Textarea, required=False)
-    key_text = forms.CharField(widget=forms.Textarea, required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['crt_file'].label = '.crt file'
-        self.fields['key_file'].label = '.key file'
+    crt_file = forms.FileField(required=False, label='.crt file')
+    key_file = forms.FileField(required=False, label='.key file')
+    crt_text = forms.CharField(widget=forms.Textarea, required=False, label='Certificate')
+    key_text = forms.CharField(widget=forms.Textarea, required=False, label='Key')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -132,3 +111,7 @@ class SiteCrt(forms.Form):
             except ObjectDoesNotExist:
                 pass
         return cleaned_data
+
+
+class RecreationSiteCrt(forms.Form):
+    validity_period = forms.DateField(label='Certificate expiration date')

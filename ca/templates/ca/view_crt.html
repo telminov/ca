@@ -16,7 +16,7 @@
                 </button>
 
                 <div class="pull-right">
-                    <a href="#" class="btn btn-default">Re-creation</a>
+                    <a href="{% url 'recreation_crt' pk=object.pk %}" role="button" class="btn btn-default">Re-creation</a>
                     <a href="{% url 'delete_crt' pk=object.pk %}" role="button" class="btn btn-danger">Delete</a>
                 </div>
 
@@ -50,6 +50,7 @@
                   </div>
                 </div>
 
+                {% for message in messages %}{{ message }}{% endfor %}
                 <div class="well">County: {% if cert.C %}{{ cert.C }}{% endif %}</div>
                 <div class="well">State: {% if cert.ST %}{{ cert.ST }}{% endif %}</div>
                 <div class="well">Location: {% if cert.L %}{{ cert.L }}{% endif %}</div>

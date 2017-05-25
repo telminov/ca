@@ -14,15 +14,25 @@ CA_CERT_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.crt')
 class CA:
     def generate_root_certificate(self, data):
         pkey = self.create_key_pair()
-        cert = self.create_cert_root(pkey, data)
+        validity_period = self.calculate_validity_period(data['validity_period'])
+        cert = self.create_cert_root(pkey, data, validity_period)
         self.write_cert_root(cert, pkey)
         self.create_model_root_crt(data)
 
-    def generate_site_certificate(self, cn):
+    def generate_site_certificate(self, cn, validity_period, pk=None):
         pkey = self.create_key_pair()
-        cert = self.create_cert_site(pkey, self.generate_subj_site_crt(cn))
+        validity_period = self.calculate_validity_period(validity_period)
+        cert = self.create_cert_site(pkey, self.generate_subj_site_crt(cn), validity_period)
         self.write_cert_site(cert, pkey, cn)
-        self.create_model_site_crt(cn)
+        if not pk:
+            self.create_model_site_crt(cn, validity_period)
+        else:
+            self.recreation_site_crt(cn, pk, validity_period)
+
+    def calculate_validity_period(self, date):
+        now = datetime.datetime.now()
+        validity_period = datetime.datetime.combine(date, now.time()) - now
+        return int(validity_period.total_seconds())
 
     @staticmethod
     def generate_subj_site_crt(cn):
@@ -45,7 +55,7 @@ class CA:
         return pkey
 
     @staticmethod
-    def create_cert_site(pkey, data):
+    def create_cert_site(pkey, data, validity_period):
         with open(os.path.join(settings.MEDIA_ROOT, CA_CERT_FILE)) as f:
             ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, f.read())
 
@@ -57,14 +67,15 @@ class CA:
 
         for key, value in data.items():
             if value != '':
-                setattr(subj, key, value)
+                if key != 'validity_period':
+                    setattr(subj, key, value)
 
         req.set_pubkey(pkey)
         req.sign(ca_key, 'sha256')
 
         cert = crypto.X509()
         cert.gmtime_adj_notBefore(0)
-        cert.gmtime_adj_notAfter(5 * 365 * 24 * 60 * 60)
+        cert.gmtime_adj_notAfter(validity_period)
         cert.set_issuer(ca_cert.get_subject())
         cert.set_subject(req.get_subject())
         cert.set_pubkey(req.get_pubkey())
@@ -72,16 +83,17 @@ class CA:
         return cert
 
     @staticmethod
-    def create_cert_root(pkey, date):
+    def create_cert_root(pkey, date, validity_period):
         cert = crypto.X509()
         subj = cert.get_subject()
 
         for key, value in date.items():
             if value != '':
-                setattr(subj, key, value)
+                    if key != 'validity_period':
+                        setattr(subj, key, value)
 
         cert.gmtime_adj_notBefore(0)
-        cert.gmtime_adj_notAfter(5 * 365 * 24 * 60 * 60)
+        cert.gmtime_adj_notAfter(validity_period)
         cert.set_issuer(cert.get_subject())
         cert.set_pubkey(pkey)
         cert.sign(pkey, 'sha256')
@@ -127,11 +139,21 @@ class CA:
         return root_crt
 
     @staticmethod
-    def create_model_site_crt(cn):
+    def create_model_site_crt(cn, validity_period):
         site_crt = models.SiteCrt.objects.create(
             key=os.path.join(cn, cn + '.key'),
             crt=os.path.join(cn, cn + '.crt'),
             cn=cn,
-            date_end=timezone.now() + datetime.timedelta(seconds=5 * 365 * 24 * 60 * 60)
+            date_end=timezone.now() + datetime.timedelta(seconds=validity_period)
+        )
+        return site_crt
+
+    @staticmethod
+    def recreation_site_crt(cn, pk, validity_period):
+        site_crt = models.SiteCrt.objects.filter(pk=pk).update(
+            key=os.path.join(cn, cn + '.key'),
+            crt=os.path.join(cn, cn + '.crt'),
+            date_start=timezone.now(),
+            date_end=timezone.now() + datetime.timedelta(seconds=validity_period)
         )
         return site_crt

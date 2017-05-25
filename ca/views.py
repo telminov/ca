@@ -3,6 +3,7 @@ from datetime import datetime
 from OpenSSL import crypto
 
 from django.conf import settings
+from django.contrib import messages
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -43,6 +44,12 @@ class AjaxCopyDataCertMixin:
             ajax_response = {'crt': crt_data, 'key': key_data}
 
             return ajax_response
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.is_ajax():
+            return self.render_to_json_response()
+        else:
+            return super().render_to_response(context, **response_kwargs)
 
 
 class CrtExist(TemplateView):
@@ -104,7 +111,7 @@ class GenerateRootCrt(CertRootExistMixin, FormView):
         return super(GenerateRootCrt, self).form_valid(form)
 
 
-class SearchSiteCrt(CertRootNotExistMixin, FormMixin, ListView):
+class SearchSiteCrt(FormMixin, ListView):
     form_class = forms.SearchSiteCrt
     model = models.SiteCrt
     template_name = 'ca/index.html'
@@ -130,7 +137,7 @@ class CreateSiteCrt(CertRootNotExistMixin, FormView):
 
     def form_valid(self, form):
         ca = CA()
-        ca.generate_site_certificate(form.cleaned_data['cn'])
+        ca.generate_site_certificate(form.cleaned_data['cn'], form.cleaned_data['validity_period'])
         return super().form_valid(form)
 
 
@@ -168,8 +175,7 @@ class ViewSiteCrt(AjaxCopyDataCertMixin, DetailView):
     model = models.SiteCrt
 
     def get_object(self, queryset=None):
-        crt_site = get_object_or_404(self.model, pk=self.kwargs['pk'])
-        return crt_site
+        return get_object_or_404(self.model, pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
         with open(self.object.crt.path, 'rt') as cert:
@@ -177,14 +183,8 @@ class ViewSiteCrt(AjaxCopyDataCertMixin, DetailView):
             kwargs['cert'] = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
         return super().get_context_data(**kwargs)
 
-    def render_to_response(self, context, **response_kwargs):
-        if self.request.is_ajax():
-            return self.render_to_json_response()
-        else:
-            return super().render_to_response(context, **response_kwargs)
 
-
-class SiteCrtDelete(DeleteView):
+class SiteCrtDelete(CertRootNotExistMixin, DeleteView):
     model = models.SiteCrt
     template_name = 'ca/delete_crt.html'
     success_url = reverse_lazy('index')
@@ -198,3 +198,22 @@ class SiteCrtDelete(DeleteView):
         for file in directory:
             os.remove(os.path.join(path_root_dir, file))
         return super().delete(request, *args, **kwargs)
+
+
+class RecreationSiteCrt(FormView):
+    form_class = forms.RecreationSiteCrt
+    template_name = 'ca/recreation_crt.html'
+
+    def get_success_url(self):
+        return reverse_lazy('view_crt', kwargs={'pk': self.kwargs['pk']})
+
+    def form_valid(self, form):
+        self.object = models.SiteCrt.objects.get(pk=self.kwargs['pk'])
+        path_root_dir = os.path.join(settings.MEDIA_ROOT, os.path.dirname(self.object.crt.name))
+        directory = os.listdir(path_root_dir)
+        for file in directory:
+            os.remove(os.path.join(path_root_dir, file))
+        ca = CA()
+        ca.generate_site_certificate(self.object.cn, form.cleaned_data['validity_period'], pk=self.object.pk)
+        messages.success(self.request, 'Recreation success')
+        return super().form_valid(form)
