@@ -23,7 +23,7 @@ $(document).ready(function () {
            dataType: 'json',
            data: {'pk': document.URL.split('/')[4]},
            success: function (data) {
-               $('#crt').val(data['crt'].replace('\\n', String.fromCharCode(13, 10)));
+               $('#crt').val(data['crt']);
                $('#key').val(data['key']);
            }
        })
