@@ -11,8 +11,9 @@
                 <h2 class="intro-text text-center">Certification file fields</h2>
                 <hr>
                 <hr class="visible-xs">
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" id="view-crt-file">
-                  View crt and key files text
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal"
+                        id="view-crt-file">
+                    View crt and key files text
                 </button>
 
                 <div class="pull-right">
@@ -21,33 +22,36 @@
                 </div>
 
                 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-                      </div>
-                      <div class="modal-body">
-                        <div id="crt-file-text">
-                            <div class="input-group">
-                                <textarea class="form-control" id="crt" cols="60" rows="11"></textarea>
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" id="copy-to-clipboard" data-clipboard-target="#crt"><i class="glyphicon glyphicon glyphicon-copy"></i></button>
-                               </span>
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                        aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">.crt and .key body</h4>
                             </div>
-                            <div class="input-group">
-                                <textarea class="form-control" id="key" cols="60" rows="11"></textarea>
-                                <span class="input-group-btn">
-                                    <button class="btn btn-default" id="copy-to-clipboard" data-clipboard-target="#key"><i class="glyphicon glyphicon glyphicon-copy"></i></button>
-                               </span>
+                            <div class="modal-body">
+                                <div id="crt-file-text">
+                                    <div class="input-group">
+                                        <textarea class="form-control" id="crt" cols="75" rows="11"></textarea>
+                                        <button class="btn btn-default" id="copy-to-clipboard"
+                                                data-clipboard-target="#crt"><i
+                                                class="glyphicon glyphicon glyphicon-copy"></i></button>
+                                    </div>
+                                    <div class="input-group">
+                                        <textarea class="form-control" id="key" cols="75" rows="11"></textarea>
+
+                                        <button class="btn btn-default" id="copy-to-clipboard"
+                                                data-clipboard-target="#key"><i
+                                                class="glyphicon glyphicon glyphicon-copy"></i></button>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                             </div>
                         </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
                     </div>
-                  </div>
                 </div>
 
                 {% for message in messages %}{{ message }}{% endfor %}
