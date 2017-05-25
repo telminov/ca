@@ -229,7 +229,18 @@ footer p {
     margin-bottom: 3rem;
 }
 
-#myModal .input-group {
-    margin-bottom: 1rem;
+#myModal .input-group:nth-child(1) {
+    margin-bottom: 1.5rem;
+}
+
+#copy-to-clipboard {
+    position: absolute;
+    top: 0.5rem;
+    right: 2rem;
+    z-index: 10;
+}
+
+.cn-table-date {
+    padding-top: 1.5rem !important;
 }
 
