@@ -8,32 +8,54 @@
     {% bootstrap_css %}
     {% bootstrap_javascript %}
     {% load static %}
-<script
-  src="https://code.jquery.com/jquery-3.2.1.js"
-  integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
-  crossorigin="anonymous"></script>
-{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>#}
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.js"
+            integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
+            crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
-{#    <script src="{% static 'ca/js/jquery.js' %}" rel="script"></script>#}
     <script src="{% static 'ca/js/custom.js' %}" rel="script"></script>
-{#    <script src="{% static 'ca/js/clipboard.min.js' %}" rel="script"></script>#}
     <link href="{% static 'ca/css/style.css' %}" rel="stylesheet">
 </head>
 <body>
 
 {% block brand %}{% endblock %}
 
-{% include 'ca/main_menu.html' %}
+<nav class="navbar navbar-default" role="navigation">
+    <div class="">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{% url 'index' %}">soft-way.biz</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li>{% if object.crt.url %}
+                    <a href="{{ object.crt.url }}">Download root certificate
+                        .crt</a>{% endif %}</li>
 
-<div class="container">
+                <li class="page-title">{% block page_title %}{% endblock %}</li>
 
+                {% if user.is_authenticated %}
+                    <li>Hello, <strong style="display: inline-block">{{ user.get_username }}</strong><a
+                            href="{% url 'logout' %}" style="display: inline-block">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
 
-    {% block content %}
+{% block content %}
 
-    {% endblock %}
-
-</div>
+{% endblock %}
 
 <footer>
     <div class="container">
