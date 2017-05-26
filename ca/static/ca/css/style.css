@@ -35,6 +35,12 @@ hr {
     display: none;
 }
 
+.navbar {
+    margin-bottom: 0;
+    border-bottom: 1px solid #333 !important;
+}
+
+
 .navbar-brand {
     text-transform: uppercase;
     font-weight: 900;
@@ -72,10 +78,15 @@ hr {
 }
 
 .box {
-    margin-bottom: 20px;
-    padding: 30px 15px;
+    border-bottom: 1px solid #333;
     background: #fff;
     background: rgba(255,255,255,0.9);
+    min-height: 30rem;
+}
+
+.col-sm-12 {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 .intro-text {
@@ -170,7 +181,7 @@ footer p {
     }
 
     .nav>li>a {
-        padding: 35px;
+        padding: 2rem;
     }
 
     .navbar-nav>li>a {
@@ -178,22 +189,11 @@ footer p {
     }
 
     .navbar-nav {
-        display: table;
+        display: flex;
         float: left;
         table-layout: fixed;
-        font-size: 1.25em;
         width: 100%;
     }
-
-    .navbar-nav>li:nth-child(2) {
-        display: inline-block;
-        width: 40%;
-    }
-
-    .navbar-nav>li:last-child {
-        float: right;
-    }
-
 }
 
 @media screen and (min-width:1200px) {
@@ -217,8 +217,8 @@ footer p {
     border-top: 1px solid #999999 !important;
 }
 
-.cn-search {
-    margin-bottom: 2rem;
+.main-table {
+    margin-bottom: 0;
 }
 
 .control-label {
@@ -240,11 +240,16 @@ footer p {
     z-index: 10;
 }
 
-.cn-table-date {
-    padding-top: 1.5rem !important;
-}
-
 #crt, #key {
     resize: none;
+}
+
+.page-title {
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.auth-form {
+    margin-top: 5rem;
 }
 
