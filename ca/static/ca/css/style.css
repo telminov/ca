@@ -244,3 +244,7 @@ footer p {
     padding-top: 1.5rem !important;
 }
 
+#crt, #key {
+    resize: none;
+}
+
