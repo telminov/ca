@@ -81,7 +81,7 @@ hr {
     border-bottom: 1px solid #333;
     background: #fff;
     background: rgba(255,255,255,0.9);
-    min-height: 30rem;
+    min-height: 579px;
 }
 
 .col-sm-12 {
@@ -221,8 +221,10 @@ footer p {
     margin-bottom: 0;
 }
 
-.control-label {
-    margin-right: 1rem;
+.form-group .control-label,
+.form-group .col-lg-7 {
+    margin-bottom: 1rem;
+    text-align: center;
 }
 
 #view-crt-file {
@@ -251,5 +253,9 @@ footer p {
 
 .auth-form {
     margin-top: 5rem;
+}
+
+.no-root-key-form {
+    margin-left: 27%;
 }
 
