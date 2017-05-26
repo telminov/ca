@@ -32,6 +32,7 @@ class RootCrt(forms.ModelForm):
         if not cert.C or not cert.ST or not cert.L or not cert.O:
             msg = 'Please enter required field in certificate: Country, State, Location, Organization'
             self.add_error('crt', msg)
+        return cleaned_data
 
     class Meta:
         model = models.RootCrt
@@ -66,6 +67,7 @@ class CreateSiteCrt(forms.Form):
             self.add_error('cn', msg)
         except ObjectDoesNotExist:
             pass
+        return cleaned_data
 
 
 class SearchSiteCrt(forms.Form):
@@ -90,6 +92,10 @@ class SiteCrt(forms.Form):
                 self.add_error('crt_file', msg)
             if crt_text or key_text:
                 self.add_error('crt_text', msg)
+        return cleaned_data
+
+    def clean_crt_file(self):
+        crt_file = self.cleaned_data['crt_file']
         if crt_file:
             crt_file_data = crt_file.read()
             crt_file.seek(0)
@@ -101,6 +107,10 @@ class SiteCrt(forms.Form):
                     self.add_error('crt_file', msg)
             except ObjectDoesNotExist:
                 pass
+            return crt_file
+
+    def clean_crt_text(self):
+        crt_text = self.cleaned_data['crt_text']
         if crt_text:
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_text)
             try:
@@ -110,7 +120,7 @@ class SiteCrt(forms.Form):
                     self.add_error('crt_text', msg)
             except ObjectDoesNotExist:
                 pass
-        return cleaned_data
+        return crt_text
 
 
 class RecreationSiteCrt(forms.Form):

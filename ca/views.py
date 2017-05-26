@@ -39,7 +39,6 @@ class AjaxCopyDataCertMixin:
             crt = models.SiteCrt.objects.get(pk=pk)
             crt_data = crt.crt.read().decode()
             key_data = crt.key.read().decode()
-            print(crt_data)
 
             ajax_response = {'crt': crt_data, 'key': key_data}
 
