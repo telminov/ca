@@ -81,12 +81,11 @@ hr {
     border-bottom: 1px solid #333;
     background: #fff;
     background: rgba(255,255,255,0.9);
-    min-height: 579px;
+    min-height: 53.7rem;
 }
 
 .col-sm-12 {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
+
 }
 
 .intro-text {
@@ -122,8 +121,8 @@ footer {
 }
 
 footer p {
-    margin: 0;
-    padding: 50px 0;
+    margin-top: 3rem;
+    padding: 0;
 }
 
 @media screen and (min-width:768px) {
@@ -227,6 +226,10 @@ footer p {
     text-align: center;
 }
 
+.form-group .control-label {
+    padding-top: 0.7rem;
+}
+
 #view-crt-file {
     margin-bottom: 3rem;
 }
@@ -238,11 +241,18 @@ footer p {
 #copy-to-clipboard {
     position: absolute;
     top: 0.5rem;
-    right: 2rem;
+    right: 3.2rem;
     z-index: 10;
 }
 
-#crt, #key {
+#copy-to-clipboard-2 {
+    position: absolute;
+    top: 20.7rem;
+    right: 3.2rem;
+    z-index: 10;
+}
+
+#crt, #key, .not-resize textarea {
     resize: none;
 }
 
@@ -256,6 +266,35 @@ footer p {
 }
 
 .no-root-key-form {
-    margin-left: 27%;
+    margin-left: 25%;
 }
 
+.well {
+    padding: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.view-crt-txtarea textarea {
+    height: 18.7rem;
+    resize: none;
+}
+
+.cn-search {
+    margin: 1rem 0;
+}
+
+.cn-search label {
+    margin-right: 1rem;
+}
+
+.cn-view-index {
+    color: #333333;
+}
+
+#id_crt_file {
+    display: inline-block;
+}
+
+#id_key_file {
+    display: inline-block;
+}

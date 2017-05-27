@@ -14,6 +14,8 @@
             crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.1/jquery.maskedinput.js"></script>
+    {#    <script src="{% static 'ca/js/jquery.js' %}" rel="script"></script>#}
     <script src="{% static 'ca/js/custom.js' %}" rel="script"></script>
     <link href="{% static 'ca/css/style.css' %}" rel="stylesheet">
 </head>
@@ -53,18 +55,31 @@
     </div>
 </nav>
 
+
+{% if breadcrumbs %}
+<div class="breadcrumbs col-sm-12">
+        <ol class="breadcrumb navbar-text head-breadcrumbs" style="margin-left: 10px">
+            {% for label, url in breadcrumbs %}
+                {% if url %}
+                    <li><a href="{{ url }}">{{ label }}</a></li>
+                {% else %}
+                    <li class="active">{{ label }}</li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+</div>
+{% endif %}
+
 {% block content %}
 
 {% endblock %}
 
-<footer>
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 text-center">
-                <p>Copyright &copy; soft-way.biz</p>
-            </div>
-        </div>
+<footer style="height: 8rem">
+
+    <div class="col-lg-12 text-center">
+        <p>Copyright &copy; soft-way.biz</p>
     </div>
+
 </footer>
 
 </body>

@@ -14,7 +14,7 @@
                 <hr class="visible-xs">
                 <form class="form form-horizontal col-sm-6 col-sm-offset-3" method="post">
                     {% csrf_token %}
-                    {% bootstrap_form form %}
+                    {% bootstrap_form form layout='horiznontal' label_class='col-sm-4' field_class='col-sm-8'%}
                     <!--
                     <div class="form-group">
                         <label for="commonName">Common Name</label>

@@ -2,6 +2,7 @@ from OpenSSL import crypto
 
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 
 from ca import models
 
@@ -28,10 +29,14 @@ class RootCrt(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         cert_data = cleaned_data.get('crt').read()
-        cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
-        if not cert.C or not cert.ST or not cert.L or not cert.O:
-            msg = 'Please enter required field in certificate: Country, State, Location, Organization'
-            self.add_error('crt', msg)
+        try:
+            cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
+            if not cert.C or not cert.ST or not cert.L or not cert.O:
+                msg = 'Please enter required field in certificate: Country, State, Location, Organization'
+                self.add_error('crt', msg)
+        except crypto.Error:
+            raise ValidationError('Please load valid certificate and key')
+
         return cleaned_data
 
     class Meta:
@@ -54,6 +59,11 @@ class ConfigRootCrt(forms.Form):
     validity_period = forms.DateField(label='Certificate expiration date')
 
 
+class ViewCrtText(forms.Form):
+    crt = forms.CharField(widget=forms.Textarea(attrs={'rows': '8'}))
+    key = forms.CharField(widget=forms.Textarea(attrs={'rows': '8'}))
+
+
 class CreateSiteCrt(forms.Form):
     cn = forms.CharField(required=False, label='Common name')
     validity_period = forms.DateField(label='Certificate expiration date')
@@ -74,11 +84,11 @@ class SearchSiteCrt(forms.Form):
     cn = forms.CharField(required=False, label='Common name')
 
 
-class SiteCrt(forms.Form):
+class LoadSiteCrt(forms.Form):
     crt_file = forms.FileField(required=False, label='.crt file')
     key_file = forms.FileField(required=False, label='.key file')
-    crt_text = forms.CharField(widget=forms.Textarea, required=False, label='Certificate')
-    key_text = forms.CharField(widget=forms.Textarea, required=False, label='Key')
+    crt_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '8'}), required=False, label='Certificate')
+    key_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '8'}), required=False, label='Key')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -99,27 +109,33 @@ class SiteCrt(forms.Form):
         if crt_file:
             crt_file_data = crt_file.read()
             crt_file.seek(0)
-            cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_file_data)
             try:
-                obj_crt_in_db = models.SiteCrt.objects.get(cn=cert.get_subject().CN)
-                if obj_crt_in_db:
-                    msg = 'Certificate with Common name already exists in db'
-                    self.add_error('crt_file', msg)
-            except ObjectDoesNotExist:
-                pass
+                cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_file_data)
+                try:
+                    obj_crt_in_db = models.SiteCrt.objects.get(cn=cert.get_subject().CN)
+                    if obj_crt_in_db:
+                        msg = 'Certificate with Common name already exists in db'
+                        self.add_error('crt_file', msg)
+                except ObjectDoesNotExist:
+                    pass
+            except crypto.Error:
+                raise ValidationError('Please load valid certificate and key')
             return crt_file
 
     def clean_crt_text(self):
         crt_text = self.cleaned_data['crt_text']
         if crt_text:
-            cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_text)
             try:
-                obj_crt_in_db = models.SiteCrt.objects.get(cn=cert.get_subject().CN)
-                if obj_crt_in_db:
-                    msg = 'Certificate with Common name already exists in db'
-                    self.add_error('crt_text', msg)
-            except ObjectDoesNotExist:
-                pass
+                cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_text)
+                try:
+                    obj_crt_in_db = models.SiteCrt.objects.get(cn=cert.get_subject().CN)
+                    if obj_crt_in_db:
+                        msg = 'Certificate with Common name already exists in db'
+                        self.add_error('crt_text', msg)
+                except ObjectDoesNotExist:
+                    pass
+            except crypto.Error:
+                raise ValidationError('Please load valid certificate and key')
         return crt_text
 
 

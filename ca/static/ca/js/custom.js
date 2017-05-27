@@ -27,6 +27,8 @@ $(document).ready(function () {
                $('#key').val(data['key']);
            }
        })
-   })
+   });
+
+    $('#id_validity_period').attr('type', 'text').mask('9999-99-99')
 
 });
