@@ -15,7 +15,13 @@ $(document).ready(function () {
       $('#second-input-button').hide();
    });
 
-   new Clipboard('#copy-to-clipboard');
+   $('#copy-to-clipboard').click(function () {
+       new Clipboard('#copy-to-clipboard');
+   });
+
+   $('#copy-to-clipboard-2').click(function () {
+       new Clipboard('#copy-to-clipboard-2');
+   });
 
    $('#view-crt-file').click(function () {
        $.ajax({
