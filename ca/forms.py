@@ -87,8 +87,8 @@ class SearchSiteCrt(forms.Form):
 class LoadSiteCrt(forms.Form):
     crt_file = forms.FileField(required=False, label='.crt file')
     key_file = forms.FileField(required=False, label='.key file')
-    crt_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '8'}), required=False, label='Certificate')
-    key_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '8'}), required=False, label='Key')
+    crt_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Certificate')
+    key_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Key')
 
     def clean(self):
         cleaned_data = super().clean()

@@ -1,8 +1,9 @@
+import os
+
 from django.contrib.auth.views import login, logout_then_login
 from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
-from django.conf.urls.static import static
 
 from ca import models
 
@@ -12,4 +13,9 @@ urlpatterns = [
                             'extra_context': {'object': models.RootCrt.objects.first(), 'brand': settings.BRAND_NAME}}, name='login'),
     url(r'^logout/', logout_then_login, {'login_url': '/login/?next=/'}, name='logout'),
     url(r'^', include('ca.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]
+
+if settings.DEBUG:
+    from django.conf.urls.static import static
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static('node_modules', document_root=os.path.join(settings.BASE_DIR, 'node_modules'))

@@ -24,13 +24,13 @@
 
 
                 <div class="col-sm-5">
-                    <div class="well">County: {% if cert.C %}{{ cert.C }}{% endif %}</div>
-                    <div class="well">State: {% if cert.ST %}{{ cert.ST }}{% endif %}</div>
-                    <div class="well">Location: {% if cert.L %}{{ cert.L }}{% endif %}</div>
-                    <div class="well">Organization: {% if cert.O %}{{ cert.O }}{% endif %}</div>
-                    <div class="well">OrgUnitName: {% if cert.OU %}{{ cert.OU }}{% endif %}</div>
-                    <div class="well">CommonName: {% if cert.CN %}{{ cert.CN }}{% endif %}</div>
-                    <div class="well">Email: {% if cert.emailAddress %}{{ cert.emailAddress }}{% endif %}</div>
+                    <div class="well"><strong>County:</strong> {% if cert.C %}{{ cert.C }}{% endif %}</div>
+                    <div class="well"><strong>State:</strong> {% if cert.ST %}{{ cert.ST }}{% endif %}</div>
+                    <div class="well"><strong>Location:</strong> {% if cert.L %}{{ cert.L }}{% endif %}</div>
+                    <div class="well"><strong>Organization:</strong> {% if cert.O %}{{ cert.O }}{% endif %}</div>
+                    <div class="well"><strong>OrgUnitName:</strong> {% if cert.OU %}{{ cert.OU }}{% endif %}</div>
+                    <div class="well"><strong>CommonName:</strong> {% if cert.CN %}{{ cert.CN }}{% endif %}</div>
+                    <div class="well"><strong>Email:</strong> {% if cert.emailAddress %}{{ cert.emailAddress }}{% endif %}</div>
                     <div class="well"><strong>Expiration date:</strong> {{ crt_validity_period }}</div>
                 </div>
                 <div class="col-sm-7">

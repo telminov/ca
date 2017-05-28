@@ -64,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.static',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -127,7 +128,9 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = '/login/'
 LOGIN_EXEMPT_URLS = (
     r'/media/',
-    r'/admin/'
+    r'/admin/',
+    r'/node_modules/',
+    r'/static/',
 )
 
 BRAND_NAME = 'Your company name'
