@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from OpenSSL import crypto
 
+from django.utils import timezone
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -181,6 +182,7 @@ class LoadSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
         )
 
     def form_valid(self, form):
+        current_tz = timezone.get_current_timezone()
         if form.cleaned_data['crt_file']:
             crt_file_data = form.cleaned_data['crt_file'].read()
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_file_data)
@@ -188,7 +190,7 @@ class LoadSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
                 key=form.cleaned_data['key_file'],
                 crt=form.cleaned_data['crt_file'],
                 cn=cert.get_subject().CN,
-                date_end=datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ')
+                date_end=current_tz.localize(datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ'))
             )
         elif form.cleaned_data['crt_text']:
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, form.cleaned_data['crt_text'])
@@ -199,7 +201,7 @@ class LoadSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
                 key=os.path.join(cn, cn + '.key'),
                 crt=os.path.join(cn, cn + '.crt'),
                 cn=cn,
-                date_end=datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ')
+                date_end=current_tz.localize(datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ'))
             )
         return super().form_valid(form)
 
@@ -254,7 +256,8 @@ class SiteCrtDelete(BreadcrumbsMixin, CertRootNotExistMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class RecreationSiteCrt(BreadcrumbsMixin, FormView):
+class RecreationSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView, DetailView):
+    model = models.SiteCrt
     form_class = forms.RecreationSiteCrt
     template_name = 'ca/recreation_crt.html'
 
@@ -268,6 +271,9 @@ class RecreationSiteCrt(BreadcrumbsMixin, FormView):
 
     def get_success_url(self):
         return reverse_lazy('view_crt', kwargs={'pk': self.kwargs['pk']})
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(self.model, pk=self.kwargs['pk'])
 
     def form_valid(self, form):
         self.object = models.SiteCrt.objects.get(pk=self.kwargs['pk'])
