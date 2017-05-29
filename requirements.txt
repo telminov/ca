@@ -2,3 +2,4 @@ django==1.11.1
 sw-django-utils==0.0.35
 django-bootstrap3==8.2.3
 pyOpenSSL==17.0.0
+factory-boy==2.8.1

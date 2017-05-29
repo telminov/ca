@@ -29,6 +29,7 @@ class RootCrt(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         cert_data = cleaned_data.get('crt').read()
+        cleaned_data.get('crt').seek(0)
         try:
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
             if not cert.C or not cert.ST or not cert.L or not cert.O:
