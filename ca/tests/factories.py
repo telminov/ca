@@ -1,3 +1,5 @@
+import datetime
+import pytz
 import factory
 
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -58,6 +60,60 @@ PKD8NjZOni8nP0uuArMJuX0=
 -----END PRIVATE KEY-----
 """
 
+site_crt_all_fields = b"""-----BEGIN CERTIFICATE-----
+MIIDkDCCAngCAQAwDQYJKoZIhvcNAQELBQAwgY0xCzAJBgNVBAYTAnJ1MRIwEAYD
+VQQDDAkxMjcuMC4wLjExDzANBgNVBAgMBm1vc2NvdzEiMCAGCSqGSIb3DQEJARYT
+bXIuYXJzMTU2QGdtYWlsLmNvbTERMA8GA1UECgwIU29mdC13YXkxETAPBgNVBAsM
+CFNvZnQtd2F5MQ8wDQYDVQQHDAZtb3Njb3cwHhcNMTcwNTI5MTMwODMzWhcNMTkw
+NTI5MTMwODMzWjCBjTEPMA0GA1UEBwwGbW9zY293MQswCQYDVQQGEwJydTERMA8G
+A1UECgwIU29mdC13YXkxIjAgBgkqhkiG9w0BCQEWE21yLmFyczE1NkBnbWFpbC5j
+b20xDzANBgNVBAgMBm1vc2NvdzERMA8GA1UECwwIU29mdC13YXkxEjAQBgNVBAMM
+CTEyNy4wLjAuMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKkN4JvZ
+3QuR1nxZVXy9LUQ5JslnT/3+iZ0WJydsDznpcVIFKV1pmy8WSL1NOE1XlHqqS3xk
+9Odlu40NsqTBW/WtizKwv/WTc4RUPfbk46PBzkGiGZuThZ8EfvSA7d/ydHefD1l9
+Mi1zBMg8LSGBFvqRwAQuPvCQIsarZe01tyie9gQ2FkvWbYaBiwKiTJZbdZhEPR7F
+CgjlxdEVgXtsJ5JIUr2xHpR0Z5AeHhbXkD5nxcJfwk5XCVOa2NcMj+I12zgZJHJL
+VEF8CHLy4od80HcJ2RKkwF5rurRAURGqrGs6Yu3O6qvFZjk54YmR9SJzq2AdIkx9
+SR0gMnTXYPPe6tECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEALEMKo0pNsej4SBZ0
+NsKi+WbWgN7hRkMIsw+RmzPl+L+1jhDp6I48M5b65B+FsUlTdViM8gPN7AuW1uLv
+Dq9ZNXHFLXeu0znegIryu857K5XJqUz8W/K01BWyZfgOfWpZsaYmMnMtsiI/j6l/
+PU/cHWvYnuRaZuKxUcjRdBdKEdR16XC47KnJKt7eXucJOK0U4zXLfEQZQ2dUVAUt
+NNcDUtvlz/BVCnz5v0aYRkW6k1K0wDgqcOIKsZGXm+55mazQXv96QQ2ylThioCaT
+sZ/xLSK1cn4n1EXUzHn3sy0nz0wauQwYL09Wg6uesZBHgWceVAR7uKN0lmg6TY47
+w6QCaw==
+-----END CERTIFICATE-----
+"""
+
+site_key_all_fields = b"""-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCpDeCb2d0LkdZ8
+WVV8vS1EOSbJZ0/9/omdFicnbA856XFSBSldaZsvFki9TThNV5R6qkt8ZPTnZbuN
+DbKkwVv1rYsysL/1k3OEVD325OOjwc5Bohmbk4WfBH70gO3f8nR3nw9ZfTItcwTI
+PC0hgRb6kcAELj7wkCLGq2XtNbconvYENhZL1m2GgYsCokyWW3WYRD0exQoI5cXR
+FYF7bCeSSFK9sR6UdGeQHh4W15A+Z8XCX8JOVwlTmtjXDI/iNds4GSRyS1RBfAhy
+8uKHfNB3CdkSpMBea7q0QFERqqxrOmLtzuqrxWY5OeGJkfUic6tgHSJMfUkdIDJ0
+12Dz3urRAgMBAAECggEARB9keEkliuj8vmUdTsPIvuos2BH6qQZuG8/2fStNQ2/v
+izarQYoxz5qyOx4n5vq4yWlgO8NO8QQMvL1dVIjabri9E/Mnl2UQsq1jvt7jYHTT
+kZ0ppoie2sJsCkj+EjVYe2+sNsp9ctUbgzjEkvC6+sPK1aRxFm1uphIhY6I2qXYl
+PzPejE0wwImFPztGzizuPerrsDJrzBboOkAzNqTY8+bdxB2xWQWUq7yyUHzwHC3u
+S2a4R8TTmnJb2L8b8A1axYnJigtNk5CTH/Zo4OjDyZ5iLV70AKwSni0ObJAZ7CnB
+h2WOV8M3jZP3mIhLoE1C3COSlupA4KbAaUVISDds8QKBgQDWL/VaXEsXxTFR2MBf
+Cs85C36rsDCn8HBsIKzrfmxBkNSv5MqMwPTWfwK3D6GN82Ob4/rdULrSPJx7g/4Q
+Mzf4yn5kcSZLR7IkiFbxc4roe73T+T+PJmoXDNpyhVIw4LENw6HGwc2a1ZRrGNgA
+8a7ftinykgan0CcVww0IBK1SRQKBgQDKDmJ4cl9dLuDTZuOunoBgiz+Oly9xb4ee
+rWi3lA4uXw40b8S3AQ8pcrp3Hiw93AX9tfsouaqRYjeBgAuc9PUw48PNS86Ky2ml
+GKYcpdkGhcxiqjKvROXzi/LZIhaZh+Itl/66w3+As5g6p5f05uxpeQ0ISjFha5vR
+1IGjudBFHQKBgQCO2Wt8uYNHtjefi705Zh8wv47a+OZqizyfkOdjJG0VCYAgU6oX
+V/WzPQBVkTJBVyt+4/0DL/15i/0dj7mZml9hKcREPwa4PHf+T4QVAueJCEZhoqGW
+Wpt1BhiHOo3HlYPgVzKFOepjssCK8QXXE1l7UKYHZwbTU0tOA0mkqGHkNQKBgEAD
+nKjiO1pPTsVLFJku+CceFq27MjmzBvl7oPCARJnmXZ65Rk5gVIhiI7c3ZPbYLUG7
+FO5LHEHhJwqtIYDBjqjFkDQLb01Dsp2umHn9BSvu2djsaRBkOKIXVYH7LcPIbBzb
+ycUryMpim7kBfcAGJSIpSrq0nr5plD0/IS9Y4CX1AoGBAKhECGpbeQBUXtvAqx3v
+tc3tMYXmlG4D5+P2gvhhc0kTjawFHVkVIZdaLncPCbYfp74lxZnCN7L9gOV9nXyK
+UI8MAatj7MfJeWXyGYZv0jefP1Qp2GSe8vs499rgejrQAE5lTtsveBgnrYZBQKit
+nd9JKxdGrDkWBPgnzxE4m9mU
+-----END PRIVATE KEY-----
+"""
+
 
 class RootCrt(factory.django.DjangoModelFactory):
     class Meta:
@@ -69,3 +125,16 @@ class RootCrt(factory.django.DjangoModelFactory):
     state = 'moscow'
     location = 'moscow'
     organization = 'Soft-way'
+    organizational_unit_name = 'Soft-way'
+    email = 'test44@gmail.com'
+
+
+class SiteCrt(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.SiteCrt
+
+    key = SimpleUploadedFile('127.0.0.1.key', site_key_all_fields)
+    crt = SimpleUploadedFile('127.0.0.1.crt', site_crt_all_fields)
+    cn = '127.0.0.1'
+    date_start = datetime.datetime(year=2017, month=5, day=29, hour=16, minute=10, second=0, tzinfo=pytz.UTC)
+    date_end = datetime.datetime(year=2019, month=5, day=29, hour=16, minute=10, second=0, tzinfo=pytz.UTC)
