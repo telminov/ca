@@ -5,3 +5,5 @@ main/local_settings.py
 *.pyc
 node_modules/
 media/
+htmlcov/
+.coverage
