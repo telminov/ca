@@ -8,6 +8,13 @@ from core import models
 
 
 class RootCrt(forms.ModelForm):
+    class Meta:
+        model = models.RootCrt
+        fields = ('key', 'crt')
+        labels = {
+            'key': 'root .key file',
+            'crt': 'root .crt file'
+        }
 
     def save(self, commit=True):
         obj = super().save(commit=False)
@@ -40,23 +47,15 @@ class RootCrt(forms.ModelForm):
 
         return cleaned_data
 
-    class Meta:
-        model = models.RootCrt
-        fields = ('key', 'crt')
-        labels = {
-            'key': 'root .key file',
-            'crt': 'root .crt file'
-        }
-
 
 class ConfigRootCrt(forms.Form):
-    C = forms.CharField(max_length=2, label='Country')
-    ST = forms.CharField(label='State')
-    L = forms.CharField(label='Location')
-    O = forms.CharField(label='Organization')
-    OU = forms.CharField(required=False, label='Organizational_unit_name')
-    CN = forms.CharField(label='Common name')
-    emailAddress = forms.EmailField(required=False, label='Email')
+    country = forms.CharField(max_length=2, label='Country')
+    state = forms.CharField(label='State')
+    location = forms.CharField(label='Location')
+    organization = forms.CharField(label='Organization')
+    organizational_unit_name = forms.CharField(required=False, label='Organizational_unit_name')
+    common_name = forms.CharField(label='Common name')
+    email = forms.EmailField(required=False, label='Email')
     validity_period = forms.DateField(label='Certificate expiration date')
 
 

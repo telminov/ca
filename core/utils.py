@@ -15,7 +15,7 @@ class CA:
     def generate_root_certificate(self, data):
         pkey = self.create_key_pair()
         validity_period = self.calculate_validity_period(data['validity_period'])
-        cert = self.create_cert_root(pkey, data, validity_period)
+        cert = self.create_cert_root(pkey, self.generate_subj_root_crt(data), validity_period)
         self.write_cert_root(cert, pkey)
         self.create_model_root_crt(data)
 
@@ -45,6 +45,18 @@ class CA:
             'OU': root.organizational_unit_name,
             'CN': cn,
             'emailAddress': root.email,
+        }
+        return options
+
+    def generate_subj_root_crt(self, data):
+        options = {
+            'C': data['country'],
+            'ST': data['state'],
+            'L': data['location'],
+            'O': data['organization'],
+            'OU': data['organizational_unit_name'],
+            'CN': data['common_name'],
+            'emailAddress': data['email'],
         }
         return options
 
