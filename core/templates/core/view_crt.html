@@ -1,21 +1,30 @@
-{% extends 'ca/base.html' %}
+{% extends 'core/base.html' %}
 {% load bootstrap3 %}
 
-{% block title %}View root crt{% endblock %}
+{% block title %}View certificate file{% endblock %}
 
-{% block page_title %}Root .crt file fields{% endblock %}
+{% block page_title %}Certification file fields{% endblock %}
 
 {% block content %}
 
     <div class="box">
         <div class="container">
+        {% if messages %}
+        <div class="alert alert-success alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    {% for message in messages %}{{ message }}{% endfor %}
+        </div>
+        {% endif %}
             <div class="col-sm-12">
-                <div class="col-sm-12" style="margin: 1rem 0">
-                    <a href="#" role="button" class="btn btn-default">Re-creation</a>
-                    <a href="{% url 'delete_root_crt' %}" role="button" class="btn btn-danger pull-right">Delete</a>
-                </div>
+            <div class="col-sm-12" style="margin: 1rem 0">
+                <a href="{% url 'recreation_crt' pk=object.pk %}" role="button" class="btn btn-default">Re-creation</a>
+                <a href="{% url 'delete_crt' pk=object.pk %}" role="button" class="btn btn-danger pull-right">Delete</a>
+            </div>
+
+
+
                 <div class="col-sm-5">
-                    <div class="well"><strong>Country:</strong> {% if cert.C %}{{ cert.C }}{% endif %}</div>
+                    <div class="well"><strong>County:</strong> {% if cert.C %}{{ cert.C }}{% endif %}</div>
                     <div class="well"><strong>State:</strong> {% if cert.ST %}{{ cert.ST }}{% endif %}</div>
                     <div class="well"><strong>Location:</strong> {% if cert.L %}{{ cert.L }}{% endif %}</div>
                     <div class="well"><strong>Organization:</strong> {% if cert.O %}{{ cert.O }}{% endif %}</div>
@@ -34,11 +43,11 @@
                                                 data-clipboard-target="#id_key"><i
                                                 class="glyphicon glyphicon glyphicon-copy"></i></button>
                 </div>
-            </div>
                 <div class="text-center" style="margin-bottom: 1rem">
                     <a href="{% url 'index' %}" role="button" class="btn btn-success">Submit</a>
                 </div>
             </div>
-    </div>
+            </div>
+        </div>
 
 {% endblock %}
