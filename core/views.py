@@ -42,20 +42,20 @@ class BreadcrumbsMixin(ContextMixin):
 
 
 class CrtExist(TemplateView):
-    template_name = 'core/root_crt_managing/root_already_exists.html'
+    template_name = 'core/root_certificate_managing/root_already_exists.html'
 
 
 class CrtNotExist(TemplateView):
-    template_name = 'core/root_crt_managing/root_not_exists.html'
+    template_name = 'core/root_certificate_managing/root_doesnt_exist.html'
 
 
 class IndexRootCrt(CertRootExistMixin, TemplateView):
-    template_name = 'core/root_crt_managing/index.html'
+    template_name = 'core/root_certificate_managing/index.html'
 
 
 class LoadRootCrt(BreadcrumbsMixin, CertRootExistMixin, CreateView):
     form_class = forms.RootCrt
-    template_name = 'core/root_crt_managing/has_root_key.html'
+    template_name = 'core/root_certificate_managing/has_root_key.html'
     success_url = reverse_lazy('view_root_crt')
 
     def get_breadcrumbs(self):
@@ -68,7 +68,7 @@ class LoadRootCrt(BreadcrumbsMixin, CertRootExistMixin, CreateView):
 class ViewRootCrt(BreadcrumbsMixin, FormMixin, DetailView):
     model = models.RootCrt
     form_class = forms.ViewCrtText
-    template_name = 'core/root_crt_managing/view_root_crt.html'
+    template_name = 'core/root_certificate_managing/view_root_files.html'
 
     def get_breadcrumbs(self):
         return (
@@ -96,7 +96,7 @@ class ViewRootCrt(BreadcrumbsMixin, FormMixin, DetailView):
 
 class RootCrtDelete(BreadcrumbsMixin, DeleteView):
     model = models.RootCrt
-    template_name = 'core/root_crt_managing/delete_root.html'
+    template_name = 'core/root_certificate_managing/delete.html'
     success_url = reverse_lazy('index_root')
 
     def get_breadcrumbs(self):
@@ -119,7 +119,7 @@ class RootCrtDelete(BreadcrumbsMixin, DeleteView):
 
 class GenerateRootCrt(BreadcrumbsMixin, CertRootExistMixin, FormView):
     form_class = forms.ConfigRootCrt
-    template_name = 'core/root_crt_managing/no_root_key.html'
+    template_name = 'core/root_certificate_managing/no_root_key.html'
     success_url = reverse_lazy('view_root_crt')
 
     def get_breadcrumbs(self):
@@ -156,7 +156,7 @@ class SearchSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormMixin, ListView
 class CreateSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
     form_class = forms.CreateSiteCrt
     success_url = reverse_lazy('index')
-    template_name = 'core/create_crt.html'
+    template_name = 'core/create.html'
 
     def get_breadcrumbs(self):
         return (
@@ -207,7 +207,7 @@ class LoadSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
 
 
 class ViewSiteCrt(BreadcrumbsMixin, FormMixin, DetailView):
-    template_name = 'core/view_crt.html'
+    template_name = 'core/view.html'
     form_class = forms.ViewCrtText
     model = models.SiteCrt
 
@@ -237,7 +237,7 @@ class ViewSiteCrt(BreadcrumbsMixin, FormMixin, DetailView):
 
 class SiteCrtDelete(BreadcrumbsMixin, CertRootNotExistMixin, DeleteView):
     model = models.SiteCrt
-    template_name = 'core/delete_crt.html'
+    template_name = 'core/delete.html'
     success_url = reverse_lazy('index')
 
     def get_breadcrumbs(self):
@@ -259,7 +259,7 @@ class SiteCrtDelete(BreadcrumbsMixin, CertRootNotExistMixin, DeleteView):
 class RecreationSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView, DetailView):
     model = models.SiteCrt
     form_class = forms.RecreationSiteCrt
-    template_name = 'core/recreation_crt.html'
+    template_name = 'core/recreation.html'
 
     def get_breadcrumbs(self):
         return (

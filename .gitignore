@@ -1,9 +1,10 @@
 .idea/
 venv/
-main/local_settings.py
+project/local_settings.py
 *.sqlite3
 *.pyc
 node_modules/
 media/
 htmlcov/
 .coverage
+
