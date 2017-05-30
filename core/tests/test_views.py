@@ -5,8 +5,8 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from ca.tests import factories
-from ca import models
+from core.tests import factories
+from core import models
 
 
 class CrtExistsView(TestCase):
@@ -28,7 +28,7 @@ class CrtExistsView(TestCase):
         response = self.client.get(reverse('root_crt_exists'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/root_crt_managing/root_already_exists.html')
+        self.assertTemplateUsed(response, 'core/root_crt_managing/root_already_exists.html')
 
 
 class CrtNotExistsView(TestCase):
@@ -50,7 +50,7 @@ class CrtNotExistsView(TestCase):
         response = self.client.get(reverse('root_crt_not_exists'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/root_crt_managing/root_not_exists.html')
+        self.assertTemplateUsed(response, 'core/root_crt_managing/root_not_exists.html')
 
 
 class IndexRootCrtView(TestCase):
@@ -72,7 +72,7 @@ class IndexRootCrtView(TestCase):
         response = self.client.get(reverse('index_root'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/root_crt_managing/index.html')
+        self.assertTemplateUsed(response, 'core/root_crt_managing/index.html')
 
     def test_root_crt_exists(self):
         factories.RootCrt.create()
@@ -101,7 +101,7 @@ class LoadRootCrtView(TestCase):
         response = self.client.get(reverse('has_root_key'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/root_crt_managing/has_root_key.html')
+        self.assertTemplateUsed(response, 'core/root_crt_managing/has_root_key.html')
 
     def test_context(self):
         self.client.force_login(user=self.user)
@@ -148,7 +148,7 @@ class ViewRootCrtView(TestCase):
         response = self.client.get(reverse('view_root_crt'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/root_crt_managing/view_root_crt.html')
+        self.assertTemplateUsed(response, 'core/root_crt_managing/view_root_crt.html')
 
     def test_context(self):
         self.client.force_login(user=self.user)
@@ -200,7 +200,7 @@ class RootCrtDeleteView(TestCase):
         response = self.client.get(reverse('delete_root_crt'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/root_crt_managing/delete_root.html')
+        self.assertTemplateUsed(response, 'core/root_crt_managing/delete_root.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
@@ -249,7 +249,7 @@ class GenerateRootCrtView(TestCase):
         response = self.client.get(reverse('no_root_key'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/root_crt_managing/no_root_key.html')
+        self.assertTemplateUsed(response, 'core/root_crt_managing/no_root_key.html')
 
     def test_root_crt_exists(self):
         factories.RootCrt.create()
@@ -301,7 +301,7 @@ class SearchSiteCrt(TestCase):
         response = self.client.get(reverse('index'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/index.html')
+        self.assertTemplateUsed(response, 'core/index.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
@@ -350,7 +350,7 @@ class CreateSiteCrtView(TestCase):
         response = self.client.get(reverse('create_crt'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/create_crt.html')
+        self.assertTemplateUsed(response, 'core/create_crt.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
@@ -394,7 +394,7 @@ class LoadSiteCrtView(TestCase):
         response = self.client.get(reverse('upload_existing'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/upload_existing.html')
+        self.assertTemplateUsed(response, 'core/upload_existing.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
@@ -451,7 +451,7 @@ class ViewSiteCrtView(TestCase):
         response = self.client.get(reverse('view_crt', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/view_crt.html')
+        self.assertTemplateUsed(response, 'core/view_crt.html')
 
     def test_context(self):
         self.client.force_login(user=self.user)
@@ -503,7 +503,7 @@ class SiteCrtDeleteView(TestCase):
         response = self.client.get(reverse('delete_crt', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/delete_crt.html')
+        self.assertTemplateUsed(response, 'core/delete_crt.html')
 
     def test_site_crt_not_exists(self):
         models.SiteCrt.objects.all().delete()
@@ -562,7 +562,7 @@ class RecreationSiteCrtView(TestCase):
         response = self.client.get(reverse('recreation_crt', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'ca/recreation_crt.html')
+        self.assertTemplateUsed(response, 'core/recreation_crt.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from ca.tests import factories
+from core.tests import factories
 
 root_crt_without_required_subj = b"""-----BEGIN CERTIFICATE-----
 MIIDXTCCAkWgAwIBAgIJAOlwYLIJGowlMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV

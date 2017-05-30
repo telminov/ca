@@ -12,9 +12,9 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView, ListView
 from django.views.generic.edit import FormMixin, ContextMixin
 
-from ca.utils import CA
-from ca import forms
-from ca import models
+from core.utils import CA
+from core import forms
+from core import models
 
 
 class CertRootExistMixin:

@@ -5,7 +5,7 @@ from OpenSSL import crypto
 from django.utils import timezone
 from django.conf import settings
 
-from ca import models
+from core import models
 
 CA_KEY_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.key')
 CA_CERT_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.crt')

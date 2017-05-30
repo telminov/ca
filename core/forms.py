@@ -4,7 +4,7 @@ from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 
-from ca import models
+from core import models
 
 
 class RootCrt(forms.ModelForm):

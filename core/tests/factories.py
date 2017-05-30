@@ -4,7 +4,7 @@ import factory
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from ca import models
+from core import models
 
 root_crt_all_fields = b"""-----BEGIN CERTIFICATE-----
 MIIDkDCCAngCAQAwDQYJKoZIhvcNAQELBQAwgY0xCzAJBgNVBAYTAnJ1MRIwEAYD

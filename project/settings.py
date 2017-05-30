@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ca',
+    'core',
     'bootstrap3',
 ]
 
@@ -52,12 +52,12 @@ MIDDLEWARE = [
     'djutils.middleware.LoginRequired',
 ]
 
-ROOT_URLCONF = 'main.urls'
+ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'ca', 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'core', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -71,7 +71,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'main.wsgi.application'
+WSGI_APPLICATION = 'project.wsgi.application'
 
 
 # Database
@@ -141,7 +141,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ROOT_CRT_PATH = 'root'
 
 try:
-    from main.local_settings import *
+    from project.local_settings import *
 except ImportError:
     print("Warning: no local_settings.py")
 
