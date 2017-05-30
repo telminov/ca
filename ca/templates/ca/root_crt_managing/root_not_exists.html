@@ -1,0 +1,17 @@
+{% extends 'ca/base.html' %}
+
+{% block title %}Root doesn't exist{% endblock %}
+
+{% block page_title%}Root .key and .crt don't exist!{% endblock %}
+
+{% block content %}
+
+    <div class="box">
+        <div class="">
+            <div class="col-sm-12">
+                <p class="text-center">You can create it by clicking this <a href="{% url 'index_root' %}">link</a>.</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

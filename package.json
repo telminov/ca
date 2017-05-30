@@ -1,0 +1,25 @@
+{
+  "name": "ca",
+  "version": "1.0.0",
+  "description": "Certification authority",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/telminov/ca.git"
+  },
+  "author": "Telminov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/telminov/ca/issues"
+  },
+  "homepage": "https://github.com/telminov/ca#readme",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "clipboard": "^1.6.1",
+    "jquery": "^3.2.1",
+    "jquery.maskedinput": "^1.4.1"
+  }
+}

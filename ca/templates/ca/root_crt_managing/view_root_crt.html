@@ -1,0 +1,44 @@
+{% extends 'ca/base.html' %}
+{% load bootstrap3 %}
+
+{% block title %}View root crt{% endblock %}
+
+{% block page_title %}Root .crt file fields{% endblock %}
+
+{% block content %}
+
+    <div class="box">
+        <div class="container">
+            <div class="col-sm-12">
+                <div class="col-sm-12" style="margin: 1rem 0">
+                    <a href="#" role="button" class="btn btn-default">Re-creation</a>
+                    <a href="{% url 'delete_root_crt' %}" role="button" class="btn btn-danger pull-right">Delete</a>
+                </div>
+                <div class="col-sm-5">
+                    <div class="well"><strong>Country:</strong> {% if cert.C %}{{ cert.C }}{% endif %}</div>
+                    <div class="well"><strong>State:</strong> {% if cert.ST %}{{ cert.ST }}{% endif %}</div>
+                    <div class="well"><strong>Location:</strong> {% if cert.L %}{{ cert.L }}{% endif %}</div>
+                    <div class="well"><strong>Organization:</strong> {% if cert.O %}{{ cert.O }}{% endif %}</div>
+                    <div class="well"><strong>OrgUnitName:</strong> {% if cert.OU %}{{ cert.OU }}{% endif %}</div>
+                    <div class="well"><strong>CommonName:</strong> {% if cert.CN %}{{ cert.CN }}{% endif %}</div>
+                    <div class="well"><strong>Email:</strong> {% if cert.emailAddress %}{{ cert.emailAddress }}{% endif %}</div>
+                    <div class="well"><strong>Expiration date:</strong> {{ crt_validity_period }}</div>
+                </div>
+                <div class="col-sm-7">
+                    {% bootstrap_field form.crt show_label=False field_class='view-crt-txtarea' %}
+                    <button class="btn btn-default" id="copy-to-clipboard"
+                                                data-clipboard-target="#id_crt"><i
+                                                class="glyphicon glyphicon glyphicon-copy"></i></button>
+                    {% bootstrap_field form.key show_label=False field_class='view-crt-txtarea' %}
+                    <button class="btn btn-default" id="copy-to-clipboard-2"
+                                                data-clipboard-target="#id_key"><i
+                                                class="glyphicon glyphicon glyphicon-copy"></i></button>
+                </div>
+            </div>
+                <div class="text-center" style="margin-bottom: 1rem">
+                    <a href="{% url 'index' %}" role="button" class="btn btn-success">Submit</a>
+                </div>
+            </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'ca/base.html' %}
+
+{% block title %}Root alredy exists{% endblock %}
+
+{% block page_title %}
+Root .key and .crt files are already exist!
+{% endblock %}
+
+{% block content %}
+
+    <div class="box">
+        <div class="">
+            <div class="col-sm-12">
+                <p class="text-center">You can view it by clicking this <a href="{% url 'view_root_crt' %}">link</a>.</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

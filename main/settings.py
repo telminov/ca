@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ca',
+    'bootstrap3',
 ]
 
 MIDDLEWARE = [
@@ -63,6 +64,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.static',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -122,11 +124,24 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static', 'root')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media', 'root')
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login/'
+LOGIN_EXEMPT_URLS = (
+    r'/media/',
+    r'/admin/',
+    r'/node_modules/',
+    r'/static/',
+)
 
+BRAND_NAME = 'Your company name'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+ROOT_CRT_PATH = 'root'
 
 try:
     from main.local_settings import *
 except ImportError:
     print("Warning: no local_settings.py")
+
