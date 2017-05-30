@@ -91,20 +91,6 @@ class LoadSiteCrt(forms.Form):
     crt_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Certificate')
     key_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Key')
 
-    def clean(self):
-        cleaned_data = super().clean()
-        crt_file = cleaned_data.get('crt_file')
-        key_file = cleaned_data.get('key_file')
-        crt_text = cleaned_data.get('crt_text')
-        key_text = cleaned_data.get('key_text')
-        if not ((crt_file and key_file) or (crt_text and key_text)):
-            msg = 'Please fill at least 2 fields(files or text)'
-            if crt_file or key_file:
-                self.add_error('crt_file', msg)
-            if crt_text or key_text:
-                self.add_error('crt_text', msg)
-        return cleaned_data
-
     def clean_crt_file(self):
         crt_file = self.cleaned_data['crt_file']
         if crt_file:
