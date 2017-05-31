@@ -42,6 +42,7 @@ VOLUME /static/
 CMD test "$(ls /conf/local_settings.py)" || cp project/local_settings.sample.py /conf/local_settings.py; \
     rm project/local_settings.py;  ln -s /conf/local_settings.py project/local_settings.py; \
     rm -rf static; ln -s /static static; \
+    rm -rf media; ln -s /media media; \
     npm install; rm -rf static/node_modules; mv node_modules static/; \
     python3 ./manage.py migrate; \
     python3 ./manage.py collectstatic --noinput; \
