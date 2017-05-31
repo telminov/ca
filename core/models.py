@@ -13,9 +13,13 @@ class RootCrt(models.Model):
     email = models.EmailField(blank=True, null=True, max_length=128)
 
 
+def directory_path(instance, filename):
+    return '{cn}/{filename}'.format(cn=instance.cn, filename=filename)
+
+
 class SiteCrt(models.Model):
-    key = models.FileField(upload_to=lambda instance, filename: '{cn}/{filename}'.format(cn=instance.cn, filename=filename))
-    crt = models.FileField(upload_to=lambda instance, filename: '{cn}/{filename}'.format(cn=instance.cn, filename=filename))
+    key = models.FileField(upload_to=directory_path)
+    crt = models.FileField(upload_to=directory_path)
     cn = models.CharField(max_length=256, unique=True)
     date_start = models.DateTimeField(auto_now_add=True)
     date_end = models.DateTimeField()
