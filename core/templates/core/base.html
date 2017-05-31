@@ -33,8 +33,8 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li><a href="{% url 'index' %}">Home</a></li>
-                <li>{% if object.crt.url %}
-                    <a href="{{ object.crt.url }}">Download root certificate
+                <li>{% if root_crt.crt.url %}
+                    <a href="{{ root_crt.crt.url }}">Download root certificate
                         .crt</a>{% endif %}</li>
 
                 <li class="page-title">{% block page_title %}{% endblock %}</li>

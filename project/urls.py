@@ -5,12 +5,11 @@ from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
 
-from core import models
-
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/', login, {'template_name': 'core/login.html', 'redirect_authenticated_user': True,
-                          'extra_context': {'object': models.RootCrt.objects.first(), 'brand': settings.BRAND_NAME}}, name='login'),
+                            'extra_context': {'brand': settings.BRAND_NAME}},
+        name='login'),
     url(r'^logout/', logout_then_login, {'login_url': '/login/?next=/'}, name='logout'),
     url(r'^', include('core.urls')),
 ]

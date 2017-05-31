@@ -156,7 +156,7 @@ class SearchSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormMixin, ListView
 class CreateSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
     form_class = forms.CreateSiteCrt
     success_url = reverse_lazy('index')
-    template_name = 'core/create.html'
+    template_name = 'core/certificate/create.html'
 
     def get_breadcrumbs(self):
         return (
@@ -171,7 +171,7 @@ class CreateSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
 
 
 class LoadSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
-    template_name = 'core/upload_existing.html'
+    template_name = 'core/certificate/upload_existing.html'
     form_class = forms.LoadSiteCrt
     success_url = reverse_lazy('index')
 
@@ -207,7 +207,7 @@ class LoadSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
 
 
 class ViewSiteCrt(BreadcrumbsMixin, FormMixin, DetailView):
-    template_name = 'core/view.html'
+    template_name = 'core/certificate/view.html'
     form_class = forms.ViewCrtText
     model = models.SiteCrt
 
@@ -237,7 +237,7 @@ class ViewSiteCrt(BreadcrumbsMixin, FormMixin, DetailView):
 
 class SiteCrtDelete(BreadcrumbsMixin, CertRootNotExistMixin, DeleteView):
     model = models.SiteCrt
-    template_name = 'core/delete.html'
+    template_name = 'core/certificate/delete.html'
     success_url = reverse_lazy('index')
 
     def get_breadcrumbs(self):
@@ -259,7 +259,7 @@ class SiteCrtDelete(BreadcrumbsMixin, CertRootNotExistMixin, DeleteView):
 class RecreationSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView, DetailView):
     model = models.SiteCrt
     form_class = forms.RecreationSiteCrt
-    template_name = 'core/recreation.html'
+    template_name = 'core/certificate/recreation.html'
 
     def get_breadcrumbs(self):
         return (
