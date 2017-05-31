@@ -116,6 +116,9 @@ class CA:
         key_path = os.path.join(settings.MEDIA_ROOT, CA_KEY_FILE)
         cert_path = os.path.join(settings.MEDIA_ROOT, CA_CERT_FILE)
 
+        if not os.path.exists(settings.MEDIA_ROOT):
+            os.mkdir(settings.MEDIA_ROOT)
+
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)):
             os.mkdir(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH))
 
@@ -141,12 +144,12 @@ class CA:
         root_crt = models.RootCrt.objects.create(
             key=CA_KEY_FILE,
             crt=CA_CERT_FILE,
-            country=data['C'],
-            state=data['ST'],
-            location=data['L'],
-            organization=data['O'],
-            organizational_unit_name=data['OU'],
-            email=data['emailAddress']
+            country=data['country'],
+            state=data['state'],
+            location=data['location'],
+            organization=data['organization'],
+            organizational_unit_name=data['organizational_unit_name'],
+            email=data['email']
         )
         return root_crt
 

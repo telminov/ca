@@ -66,6 +66,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.static',
                 'django.contrib.messages.context_processors.messages',
+                'core.ca_context_processor.ca_context_processor',
             ],
         },
     },
@@ -102,6 +103,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+TEST_RUNNER = 'core.tests.runner.TempMediaMixin'
 
 
 # Internationalization

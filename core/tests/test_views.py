@@ -271,10 +271,10 @@ class GenerateRootCrtView(TestCase):
     def test_success_url(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('no_root_key'), {'C': 'ru', 'ST': 'moscow', 'L': 'moscow', 'O': 'soft-way',
-                                                             'OU': 'soft-way', 'CN': '127.0.0.1',
-                                                             'emailAddress': 'test44@gmail.com',
-                                                             'validity_period': '2032-05-29'})
+        response = self.client.post(reverse('no_root_key'), {'country': 'ru', 'state': 'moscow', 'location': 'moscow',
+                                                             'organization': 'soft-way', 'organizational_unit_name':
+                                                                 'soft-way', 'common_name': '127.0.0.1', 'email':
+                                                                 'test44@gmail.com', 'validity_period': '2032-05-29'})
 
         self.assertEqual(models.RootCrt.objects.all().count(), 1)
         self.assertRedirects(response, reverse('view_root_crt'))
@@ -350,7 +350,7 @@ class CreateSiteCrtView(TestCase):
         response = self.client.get(reverse('create_crt'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/create.html')
+        self.assertTemplateUsed(response, 'core/certificate/create.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
@@ -394,7 +394,7 @@ class LoadSiteCrtView(TestCase):
         response = self.client.get(reverse('upload_existing'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/upload_existing.html')
+        self.assertTemplateUsed(response, 'core/certificate/upload_existing.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
@@ -451,7 +451,7 @@ class ViewSiteCrtView(TestCase):
         response = self.client.get(reverse('view_crt', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/view.html')
+        self.assertTemplateUsed(response, 'core/certificate/view.html')
 
     def test_context(self):
         self.client.force_login(user=self.user)
@@ -503,7 +503,7 @@ class SiteCrtDeleteView(TestCase):
         response = self.client.get(reverse('delete_crt', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/delete.html')
+        self.assertTemplateUsed(response, 'core/certificate/delete.html')
 
     def test_site_crt_not_exists(self):
         models.SiteCrt.objects.all().delete()
@@ -536,7 +536,8 @@ class SiteCrtDeleteView(TestCase):
         response = self.client.get(reverse('delete_crt', kwargs={'pk': '1'}))
 
         self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index')))
-        self.assertEqual(response.context['breadcrumbs'][1], ('View %s' % models.SiteCrt.objects.get().cn, reverse('view_crt', kwargs={'pk': 1})))
+        self.assertEqual(response.context['breadcrumbs'][1], ('View %s' % models.SiteCrt.objects.get().cn,
+                                                              reverse('view_crt', kwargs={'pk': 1})))
         self.assertEqual(response.context['breadcrumbs'][2], ('Delete %s' % models.SiteCrt.objects.get().cn, ''))
 
 
@@ -562,7 +563,7 @@ class RecreationSiteCrtView(TestCase):
         response = self.client.get(reverse('recreation_crt', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/recreation.html')
+        self.assertTemplateUsed(response, 'core/certificate/recreation.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
