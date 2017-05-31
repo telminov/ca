@@ -9,8 +9,8 @@ from core import models
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^login/', login, {'template_name': 'core/login_page.html', 'redirect_authenticated_user': True,
-                            'extra_context': {'object': models.RootCrt.objects.first(), 'brand': settings.BRAND_NAME}}, name='login'),
+    url(r'^login/', login, {'template_name': 'core/login.html', 'redirect_authenticated_user': True,
+                          'extra_context': {'object': models.RootCrt.objects.first(), 'brand': settings.BRAND_NAME}}, name='login'),
     url(r'^logout/', logout_then_login, {'login_url': '/login/?next=/'}, name='logout'),
     url(r'^', include('core.urls')),
 ]
