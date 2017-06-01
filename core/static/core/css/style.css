@@ -118,6 +118,7 @@ hr {
 footer {
     background: #fff;
     background: rgba(255,255,255,0.9);
+    height: 8rem !important;
 }
 
 footer p {
@@ -129,7 +130,7 @@ footer p {
     .brand {
         display: inherit;
         margin: 0;
-        padding: 30px 0 10px;
+        padding: 30px 0 30px;
         text-align: center;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         font-family: "Josefin Slab","Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -262,7 +263,7 @@ footer p {
 }
 
 .auth-form {
-    margin-top: 5rem;
+    margin-top: 10rem;
 }
 
 .no-root-key-form {
@@ -297,4 +298,8 @@ footer p {
 
 #id_key_file {
     display: inline-block;
+}
+
+.root-crt-warning {
+    padding-top: 3rem;
 }
