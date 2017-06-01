@@ -1,6 +1,6 @@
 import shutil
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from OpenSSL import crypto
 
 from django.utils import timezone
@@ -163,6 +163,9 @@ class CreateSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
             ('Home', reverse('index')),
             ('Create new certificate', '')
         )
+
+    def get_initial(self):
+        return {'validity_period': timezone.now() + timedelta(days=settings.VALIDITY_PERIOD_CRT)}
 
     def form_valid(self, form):
         ca = CA()
