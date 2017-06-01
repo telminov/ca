@@ -48,9 +48,8 @@ hr {
 }
 
 .navbar-nav {
-    text-transform: uppercase;
-    font-weight: 400;
-    letter-spacing: 3px;
+    font-weight: 600;
+    letter-spacing: 1px;
 }
 
 .img-full {
@@ -123,6 +122,16 @@ footer {
 footer p {
     margin-top: 3rem;
     padding: 0;
+    font-size: 16px;
+}
+
+footer a {
+    color: #333;
+}
+
+footer a:hover {
+    color: #000;
+    text-decoration: underline;
 }
 
 @media screen and (min-width:768px) {
