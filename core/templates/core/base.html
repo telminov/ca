@@ -19,52 +19,51 @@
 {% block brand %}{% endblock %}
 
 {% block menu %}
-<nav class="navbar navbar-default" role="navigation">
-    <div class="">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse"
-                    data-target="#bs-example-navbar-collapse-1">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="{% url 'index' %}">soft-way.biz</a>
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% url 'index' %}">soft-way.biz</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        {% if root_crt.crt.url %}
+                            <a href="{{ root_crt.crt.url }}" title="Download root certificate">CA.crt
+                                .crt</a>{% endif %}
+                    </li>
+                    <li>
+                        {% if breadcrumbs %}
+                            <div class="breadcrumbs col-sm-12">
+                                <ol class="breadcrumb navbar-text head-breadcrumbs" style="margin-left: 10px">
+                                    {% for label, url in breadcrumbs %}
+                                        {% if url %}
+                                            <li><a href="{{ url }}">{{ label }}</a></li>
+                                        {% else %}
+                                            <li class="active">{{ label }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ol>
+                            </div>
+                        {% endif %}
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li>Hello, <strong style="display: inline-block">{{ user.get_username }}</strong><a
+                                href="{% url 'logout' %}" style="display: inline-block">Logout</a></li>
+                    {% else %}
+                        <li><a href="{% url 'login' %}">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li><a href="{% url 'index' %}">Home</a></li>
-                <li>{% if root_crt.crt.url %}
-                    <a href="{{ root_crt.crt.url }}" title="Download root certificate">Download ca.crt
-                        .crt</a>{% endif %}</li>
-
-                <li class="page-title">{% block page_title %}{% endblock %}</li>
-
-                {% if user.is_authenticated %}
-                    <li>Hello, <strong style="display: inline-block">{{ user.get_username }}</strong><a
-                            href="{% url 'logout' %}" style="display: inline-block">Logout</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">Login</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</nav>
+    </nav>
 {% endblock %}
-
-{% if breadcrumbs %}
-<div class="breadcrumbs col-sm-12">
-        <ol class="breadcrumb navbar-text head-breadcrumbs" style="margin-left: 10px">
-            {% for label, url in breadcrumbs %}
-                {% if url %}
-                    <li><a href="{{ url }}">{{ label }}</a></li>
-                {% else %}
-                    <li class="active">{{ label }}</li>
-                {% endif %}
-            {% endfor %}
-        </ol>
-</div>
-{% endif %}
 
 {% block content %}
 
