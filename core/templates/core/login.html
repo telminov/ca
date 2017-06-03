@@ -12,44 +12,18 @@
 {% endblock %}
 
 {% block menu %}
-    <nav class="navbar navbar-default" role="navigation">
-        <div class="">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse"
-                        data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="{% url 'index' %}">soft-way.biz</a>
-            </div>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav">
-                    <li>
-                        {% if root_crt.crt.url %}
-                            <a href="{{ root_crt.crt.url }}" title="Download root certificate">Download root certificate
-                                .crt</a>
-                        {% else %}
-                            <a href="{% url 'no_root_key' %}">Create root certificate</a>
-                        {% endif %}
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 {% endblock %}
 
 {% block content %}
 
-    <div class="box" style="min-height: 35.2rem">
+    <div class="box login-page">
         <div class="container">
-            <div class="col-lg-12">
-                <form class="form-horizontal col-sm-6 col-sm-offset-3 auth-form" method="post">
+            <div class="col-sm-8 col-sm-offset-2 col-md-5 col-md-offset-3">
+                <form class="form-horizontal auth-form" method="post">
                     {% csrf_token %}
-                    {% bootstrap_form form layout='horizontal'%}
+                    {% bootstrap_form form layout='horizontal' horizontal_field_class='col-xs-9' horizontal_label_class='col-xs-3' %}
                     <div class="form-group">
-                        <div class="col-sm-offset-5 col-sm-2">
+                        <div class="col-xs-3 col-xs-offset-3  col-sm-2 col-sm-offset-5">
                             <button type="submit" class="btn btn-default">Submit</button>
                         </div>
                     </div>

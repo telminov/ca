@@ -83,11 +83,8 @@ hr {
     min-height: 53.7rem;
 }
 
-.col-sm-12 {
-
-}
-
 .intro-text {
+    margin-top: 5rem;
     text-transform: uppercase;
     font-size: 1.25em;
     font-weight: 400;
@@ -121,18 +118,8 @@ footer {
 }
 
 footer p {
-    margin-top: 3rem;
-    padding: 0;
+    padding-top: 3rem;
     font-size: 16px;
-}
-
-footer a {
-    color: #333;
-}
-
-footer a:hover {
-    color: #000;
-    text-decoration: underline;
 }
 
 @media screen and (min-width:768px) {
@@ -197,10 +184,11 @@ footer a:hover {
         line-height: normal;
     }
 
+    .navbar-nav>li:last-child {
+        float: right;
+    }
+
     .navbar-nav {
-        display: flex;
-        float: left;
-        table-layout: fixed;
         width: 100%;
     }
 }
@@ -266,16 +254,12 @@ footer a:hover {
     resize: none;
 }
 
-.page-title {
-    margin: 0 auto;
-    padding: 2rem;
-}
-
 .auth-form {
-    margin-top: 10rem;
+    margin-top: 7rem;
 }
 
 .no-root-key-form {
+    margin-top: 3rem;
     margin-left: 25%;
 }
 
@@ -289,16 +273,14 @@ footer a:hover {
     resize: none;
 }
 
-.cn-search {
+.cn-search,
+.view-root-crt-btns,
+.view-crt-buttons {
     margin: 1rem 0;
 }
 
 .cn-search label {
     margin-right: 1rem;
-}
-
-.cn-view-index {
-    color: #333333;
 }
 
 #id_crt_file {
@@ -309,6 +291,34 @@ footer a:hover {
     display: inline-block;
 }
 
-.root-crt-warning {
-    padding-top: 3rem;
+.root-doesnt-exist {
+    padding-top: 5rem;
+}
+
+.upload-existing {
+    margin-top: 5rem;
+}
+
+.upload-existing-btn {
+    margin-right: 1rem;
+}
+
+.upload-existing-btns {
+    padding: 0;
+}
+
+.breadcrumb {
+    margin-bottom: 0;
+    margin-top: 1rem;
+}
+
+#first-input-button,
+#second-input-button {
+    margin-bottom: 3rem;
+}
+
+.has-root-key,
+.has-root-crt {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
 }

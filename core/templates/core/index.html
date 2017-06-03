@@ -12,14 +12,13 @@
             <div class="col-sm-12 cn-search">
                 <div class="col-sm-6">
                     <form class="form-inline" method="get">
-                        {% bootstrap_field form.cn %}
+                        {% bootstrap_field form.cn show_label=False %}
                         <button type="submit" class="btn btn-default">Search</button>
                     </form>
                 </div>
                 <div class="col-sm-3 col-sm-offset-3">
                     <a href="{% url 'create_crt' %}" class="btn btn-default pull-right">New .crt</a>
-                    <a href="{% url 'upload_existing' %}" class="btn btn-default pull-right"
-                       style="margin-right: 1rem;">Upload existing</a>
+                    <a href="{% url 'upload_existing' %}" class="btn btn-default pull-right upload-existing-btn">Upload existing</a>
                 </div>
             </div>
             <table class="table main-table">
@@ -31,7 +30,7 @@
                 </tr>
                 {% for x in object_list %}
                     <tr>
-                        <td><a href="{% url 'view_crt' pk=x.pk %}" class="cn-view-index"><i>{{ x.cn }}</i></a></td>
+                        <td><a href="{% url 'view_crt' pk=x.pk %}">{{ x.cn }}</a></td>
                         <td class="cn-table-date">{{ x.date_start }}</td>
                         <td class="cn-table-date">{{ x.date_end }}</td>
                         <td><a class="btn btn-default" href="{{ x.crt.url }}">crt</a> <a class="btn btn-default" href="{{ x.key.url }}">key</a></td>
