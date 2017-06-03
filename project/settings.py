@@ -138,6 +138,8 @@ LOGIN_EXEMPT_URLS = (
 
 BRAND_NAME = 'Your company name'
 
+VALIDITY_PERIOD_CRT = 365
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
