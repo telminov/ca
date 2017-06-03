@@ -18,6 +18,7 @@
 
 {% block brand %}{% endblock %}
 
+{% block menu %}
 <nav class="navbar navbar-default" role="navigation">
     <div class="">
         <div class="navbar-header">
@@ -34,7 +35,7 @@
             <ul class="nav navbar-nav">
                 <li><a href="{% url 'index' %}">Home</a></li>
                 <li>{% if root_crt.crt.url %}
-                    <a href="{{ root_crt.crt.url }}">Download root certificate
+                    <a href="{{ root_crt.crt.url }}" title="Download root certificate">Download ca.crt
                         .crt</a>{% endif %}</li>
 
                 <li class="page-title">{% block page_title %}{% endblock %}</li>
@@ -49,7 +50,7 @@
         </div>
     </div>
 </nav>
-
+{% endblock %}
 
 {% if breadcrumbs %}
 <div class="breadcrumbs col-sm-12">
@@ -69,7 +70,7 @@
 
 {% endblock %}
 
-<footer style="height: 8rem">
+<footer>
 
     <div class="col-lg-12 text-center">
         <p>Copyright &copy; soft-way.biz</p>

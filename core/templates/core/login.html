@@ -8,8 +8,36 @@
 {% block page_title %}Authentification{% endblock %}
 
 {% block brand %}
-<div class="brand">{{ brand }}</div>
-<div class="address-bar">Only fresh certificates</div>
+    <div class="brand">{{ brand }}</div>
+{% endblock %}
+
+{% block menu %}
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% url 'index' %}">soft-way.biz</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        {% if root_crt.crt.url %}
+                            <a href="{{ root_crt.crt.url }}" title="Download root certificate">Download root certificate
+                                .crt</a>
+                        {% else %}
+                            <a href="{% url 'no_root_key' %}">Create root certificate</a>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 {% endblock %}
 
 {% block content %}
@@ -19,13 +47,10 @@
             <div class="col-lg-12">
                 <form class="form-horizontal col-sm-6 col-sm-offset-3 auth-form" method="post">
                     {% csrf_token %}
-                    {% bootstrap_form form %}
+                    {% bootstrap_form form layout='horizontal'%}
                     <div class="form-group">
-                        <div class="col-sm-offset-4 col-sm-2">
+                        <div class="col-sm-offset-5 col-sm-2">
                             <button type="submit" class="btn btn-default">Submit</button>
-                        </div>
-                        <div class="col-sm-2">
-                            <button type="submit" class="btn btn-danger">Cancel</button>
                         </div>
                     </div>
                 </form>
