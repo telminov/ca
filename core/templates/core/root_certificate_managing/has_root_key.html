@@ -13,8 +13,9 @@
                 <form enctype="multipart/form-data" method="post">
                     {% csrf_token %}
                     <div class="text-center">
-                    {% bootstrap_field form.key layout="horizontal" form_group_class="col-sm-6 has-root-key" horizontal_field_class="col-xs-9" horizontal_label_class="col-xs-3" %}
-                    {% bootstrap_field form.crt layout="horizontal" form_group_class="col-sm-6 has-root-crt" horizontal_field_class="col-xs-9" horizontal_label_class="col-xs-3" %}
+                        {% bootstrap_form form layout="horizontal" form_group_class="col-sm-12 has-root-key" horizontal_field_class="col-xs-8" horizontal_label_class="col-xs-4" %}
+{#                    {% bootstrap_field form.key layout="horizontal"  %}#}
+{#                    {% bootstrap_field form.crt layout="horizontal" form_group_class="col-sm-6 has-root-crt" horizontal_field_class="col-xs-8" horizontal_label_class="col-xs-4" %}#}
                     <div class="col-sm-12">
                         <button type="submit" class="btn btn-default">Submit</button>
                     </div>

@@ -317,12 +317,24 @@ footer p {
     margin-bottom: 3rem;
 }
 
-.has-root-key,
-.has-root-crt {
-    margin-top: 3rem;
-    margin-bottom: 3rem;
+.has-root-key {
+    margin-top: 1rem;
+    margin-bottom: 2rem;
 }
 
 .create-crt {
     margin-top: 7rem;
 }
+
+.copyright {
+    color: gray;
+}
+
+.view-crt {
+    margin-top: 3rem;
+}
+
+.submit-view-crt-btn {
+    margin-left: 1rem;
+}
+
