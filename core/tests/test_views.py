@@ -16,6 +16,7 @@ class CrtExistsView(TestCase):
             username='Serega',
             password='passwd',
         )
+        factories.RootCrt.create()
 
     def test_auth(self):
         response = self.client.get(reverse('root_crt_exists'))
@@ -29,28 +30,6 @@ class CrtExistsView(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/root_certificate_managing/root_already_exists.html')
-
-
-class CrtNotExistsView(TestCase):
-
-    def setUp(self):
-        self.user = User.objects.create(
-            username='Serega',
-            password='passwd',
-        )
-
-    def test_auth(self):
-        response = self.client.get(reverse('root_crt_not_exists'))
-        redirect_url = reverse('login') + '?next=' + reverse('root_crt_not_exists')
-
-        self.assertRedirects(response, redirect_url)
-
-    def test_smoke(self):
-        self.client.force_login(user=self.user)
-        response = self.client.get(reverse('root_crt_not_exists'))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/root_certificate_managing/root_doesnt_exist.html')
 
 
 class IndexRootCrtView(TestCase):
@@ -176,7 +155,7 @@ class ViewRootCrtView(TestCase):
 
         response = self.client.get(reverse('view_root_crt'))
 
-        self.assertEqual(response.status_code, 404)
+        self.assertRedirects(response, reverse('index_root'))
 
 
 class RootCrtDeleteView(TestCase):
@@ -208,7 +187,7 @@ class RootCrtDeleteView(TestCase):
 
         response = self.client.get(reverse('delete_root_crt'))
 
-        self.assertEqual(response.status_code, 404)
+        self.assertRedirects(response, reverse('index_root'))
 
     # в первом приближении
     def test_delete(self):
@@ -290,15 +269,15 @@ class SearchSiteCrt(TestCase):
         factories.RootCrt.create()
 
     def test_auth(self):
-        response = self.client.get(reverse('index'))
-        redirect_url = reverse('login') + '?next=' + reverse('index')
+        response = self.client.get(reverse('certificate_search'))
+        redirect_url = reverse('login') + '?next=' + reverse('certificate_search')
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('index'))
+        response = self.client.get(reverse('certificate_search'))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/index.html')
@@ -307,25 +286,16 @@ class SearchSiteCrt(TestCase):
         models.RootCrt.objects.all().delete()
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('index'))
+        response = self.client.get(reverse('certificate_search'))
 
-        self.assertRedirects(response, reverse('root_crt_not_exists'))
-
-    def test_context(self):
-        factories.SiteCrt.create()
-        self.client.force_login(user=self.user)
-
-        response = self.client.get(reverse('index'))
-
-        self.assertEqual(response.context['object'], models.RootCrt.objects.get())
-        self.assertEqual(len(response.context['object_list']), 1)
+        self.assertRedirects(response, reverse('index_root'))
 
     def test_search(self):
         factories.SiteCrt.create()
         factories.SiteCrt.create(cn='127.0.0.2')
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('index'), {'cn': '127.0.0.1'})
+        response = self.client.get(reverse('certificate_search'), {'cn': '127.0.0.1'})
 
         self.assertEqual(len(response.context['object_list']), 1)
 
@@ -357,13 +327,13 @@ class CreateSiteCrtView(TestCase):
         self.client.force_login(user=self.user)
         response = self.client.get(reverse('create_crt'))
 
-        self.assertRedirects(response, reverse('root_crt_not_exists'))
+        self.assertRedirects(response, reverse('index_root'))
 
     def test_success_url(self):
         self.client.force_login(user=self.user)
         response = self.client.post(reverse('create_crt'), {'cn': '127.0.0.1', 'validity_period': '2019-05-29'})
 
-        self.assertRedirects(response, reverse('index'))
+        self.assertRedirects(response, reverse('certificate_search'))
         self.assertEqual(models.SiteCrt.objects.get().cn, '127.0.0.1')
 
     def test_context(self):
@@ -401,7 +371,7 @@ class LoadSiteCrtView(TestCase):
         self.client.force_login(user=self.user)
         response = self.client.get(reverse('upload_existing'))
 
-        self.assertRedirects(response, reverse('root_crt_not_exists'))
+        self.assertRedirects(response, reverse('index_root'))
 
     def test_context(self):
         self.client.force_login(user=self.user)
@@ -417,7 +387,7 @@ class LoadSiteCrtView(TestCase):
                                     {'crt_file': SimpleUploadedFile('test.crt', factories.site_crt_all_fields),
                                      'key_file': SimpleUploadedFile('test.key', factories.site_key_all_fields)})
 
-        self.assertRedirects(response, reverse('index'))
+        self.assertRedirects(response, reverse('certificate_search'))
         self.assertEqual(models.SiteCrt.objects.all().count(), 1)
 
     def test_form_valid_text(self):
@@ -425,7 +395,7 @@ class LoadSiteCrtView(TestCase):
         response = self.client.post(reverse('upload_existing'), {'crt_text': factories.site_crt_all_fields.decode(),
                                                                  'key_text': factories.site_key_all_fields.decode()})
 
-        self.assertRedirects(response, reverse('index'))
+        self.assertRedirects(response, reverse('certificate_search'))
         self.assertEqual(models.SiteCrt.objects.all().count(), 1)
 
 
@@ -519,7 +489,7 @@ class SiteCrtDeleteView(TestCase):
 
         response = self.client.get(reverse('delete_crt', kwargs={'pk': '1'}))
 
-        self.assertRedirects(response, reverse('root_crt_not_exists'))
+        self.assertRedirects(response, reverse('index_root'))
 
     # в первом приближении
     def test_delete(self):
@@ -528,7 +498,7 @@ class SiteCrtDeleteView(TestCase):
         response = self.client.post(reverse('delete_crt', kwargs={'pk': '1'}))
 
         self.assertEqual(models.SiteCrt.objects.all().count(), 0)
-        self.assertRedirects(response, reverse('index'))
+        self.assertRedirects(response, reverse('certificate_search'))
 
     def test_context(self):
         self.client.force_login(user=self.user)
@@ -571,7 +541,7 @@ class RecreationSiteCrtView(TestCase):
 
         response = self.client.get(reverse('recreation_crt', kwargs={'pk': '1'}))
 
-        self.assertRedirects(response, reverse('root_crt_not_exists'))
+        self.assertRedirects(response, reverse('index_root'))
 
     def test_site_crt_not_exists(self):
         models.SiteCrt.objects.all().delete()

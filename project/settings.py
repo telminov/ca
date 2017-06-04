@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'djutils.middleware.LoginRequired',
+    'core.middleware.RootCrtMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -133,6 +134,8 @@ LOGIN_EXEMPT_URLS = (
     r'/media/',
     r'/admin/',
     r'/node_modules/',
+    r'/login(.*)$',
+    r'/logout(.*)$',
     r'/static/',
 )
 
@@ -144,6 +147,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ROOT_CRT_PATH = 'root'
+
+ROOT_CRT_INTERFACE = [r'/change_root_crt/', r'/has_root_key/', r'/no_root_key/']
 
 try:
     from project.local_settings import *
