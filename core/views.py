@@ -275,6 +275,9 @@ class RecreationSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView, Detai
     def get_success_url(self):
         return reverse_lazy('view_crt', kwargs={'pk': self.kwargs['pk']})
 
+    def get_initial(self):
+        return {'validity_period': timezone.now() + timedelta(days=settings.VALIDITY_PERIOD_CRT)}
+
     def get_object(self, queryset=None):
         return get_object_or_404(self.model, pk=self.kwargs['pk'])
 
