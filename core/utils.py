@@ -12,12 +12,16 @@ CA_CERT_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.crt')
 
 
 class CA:
-    def generate_root_certificate(self, data):
+    def generate_root_certificate(self, data, recreation=False):
         pkey = self.create_key_pair()
         validity_period = self.calculate_validity_period(data['validity_period'])
-        cert = self.create_cert_root(pkey, self.generate_subj_root_crt(data), validity_period)
+        if recreation:
+            cert = self.create_cert_root(pkey, self.generate_subj_recreation_root_crt(), validity_period)
+        else:
+            cert = self.create_cert_root(pkey, self.generate_subj_root_crt(data), validity_period)
         self.write_cert_root(cert, pkey)
-        self.create_model_root_crt(data)
+        if not recreation:
+            self.create_model_root_crt(data)
 
     def generate_site_certificate(self, cn, validity_period, pk=None):
         pkey = self.create_key_pair()
@@ -44,6 +48,18 @@ class CA:
             'O': root.organization,
             'OU': root.organizational_unit_name,
             'CN': cn,
+            'emailAddress': root.email,
+        }
+        return options
+
+    def generate_subj_recreation_root_crt(self):
+        root = models.RootCrt.objects.get()
+        options = {
+            'C': root.country,
+            'ST': root.state,
+            'L': root.location,
+            'O': root.organization,
+            'OU': root.organizational_unit_name,
             'emailAddress': root.email,
         }
         return options
