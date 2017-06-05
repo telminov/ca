@@ -85,8 +85,8 @@ class SearchSiteCrt(forms.Form):
 
 
 class LoadSiteCrt(forms.Form):
-    crt_file = forms.FileField(required=False, label='.crt file')
-    key_file = forms.FileField(required=False, label='.key file')
+    crt_file = forms.FileField(required=False, label='certificate .crt file')
+    key_file = forms.FileField(required=False, label='certificate .key file')
     crt_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Certificate')
     key_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Key')
 
