@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
-    {% load bootstrap3 %}
 
-    <link href="/node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-    <link href="{{ STATIC_URL }}core/css/style.css" rel="stylesheet">
+    <link href="https://bootswatch.com/simplex/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ STATIC_URL }}core/css/custom_style.css" rel="stylesheet">
 
     <script src="/node_modules/jquery/dist/jquery.min.js"></script>
     <script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -19,19 +18,16 @@
 {% block brand %}{% endblock %}
 
 {% block menu %}
-    <nav class="navbar navbar-default" role="navigation">
-        <div class="">
+    <div class="navbar navbar-default">
+        <div class="container-fluid">
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse"
-                        data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Toggle navigation</span>
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{% url 'index' %}">soft-way.biz</a>
             </div>
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <div class="navbar-collapse collapse" id="navbar-main">
                 <ul class="nav navbar-nav">
                     <li>
                         {% if root_crt.crt.url %}
@@ -40,7 +36,7 @@
                     <li>
                         {% if breadcrumbs %}
                             <div class="breadcrumbs col-sm-12">
-                                <ol class="breadcrumb navbar-text head-breadcrumbs" style="margin-left: 10px">
+                                <ol class="breadcrumb head-breadcrumbs">
                                     {% for label, url in breadcrumbs %}
                                         {% if url %}
                                             <li><a href="{{ url }}">{{ label }}</a></li>
@@ -52,6 +48,8 @@
                             </div>
                         {% endif %}
                     </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
                     {% if user.is_authenticated %}
                         <li>Hello, <strong style="display: inline-block">{{ user.get_username }}</strong><a
                                 href="{% url 'logout' %}" style="display: inline-block">Logout</a></li>
@@ -61,7 +59,7 @@
                 </ul>
             </div>
         </div>
-    </nav>
+    </div>
 {% endblock %}
 
 {% block content %}
@@ -69,11 +67,10 @@
 {% endblock %}
 
 <footer>
-
-    <div class="col-lg-12 text-center">
-        <p class="pull-right copyright">copyright &copy; <a href="http://soft-way.biz" target="_blank">soft-way.biz</a></p>
+    <div class="col-xs-12 text-center">
+        <p class="pull-right copyright">copyright &copy; <a href="http://soft-way.biz" target="_blank">soft-way.biz</a>
+        </p>
     </div>
-
 </footer>
 
 </body>
