@@ -90,8 +90,16 @@ class LoadSiteCrt(forms.Form):
     crt_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Certificate')
     key_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Key')
 
+    def clean(self):
+        crt_file = self.cleaned_data.get('crt_file')
+        key_file = self.cleaned_data.get('key_file')
+        crt_text = self.cleaned_data.get('crt_text')
+        key_text = self.cleaned_data.get('key_text')
+        if (crt_file or key_file) and (crt_text or key_text):
+            raise ValidationError('Please fill only 2 field to choose from(File or Text)')
+
     def clean_crt_file(self):
-        crt_file = self.cleaned_data['crt_file']
+        crt_file = self.cleaned_data.get('crt_file')
         if crt_file:
             crt_file_data = crt_file.read()
             crt_file.seek(0)
@@ -109,7 +117,7 @@ class LoadSiteCrt(forms.Form):
             return crt_file
 
     def clean_crt_text(self):
-        crt_text = self.cleaned_data['crt_text']
+        crt_text = self.cleaned_data.get('crt_text')
         if crt_text:
             try:
                 cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_text)
