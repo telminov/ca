@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
-from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView, ListView
+from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView, ListView, RedirectView
 from django.views.generic.edit import FormMixin, ContextMixin
 
 from core.utils import CA
@@ -21,13 +21,6 @@ class CertRootExistMixin:
     def get(self, request, *args, **kwargs):
         if models.RootCrt.objects.exists():
             return HttpResponseRedirect(reverse_lazy('root_crt_exists'))
-        return super().get(request, *args, **kwargs)
-
-
-class CertRootNotExistMixin:
-    def get(self, request, *args, **kwargs):
-        if models.RootCrt.objects.all().count() == 0:
-            return HttpResponseRedirect(reverse_lazy('root_crt_not_exists'))
         return super().get(request, *args, **kwargs)
 
 
@@ -43,10 +36,6 @@ class BreadcrumbsMixin(ContextMixin):
 
 class CrtExist(TemplateView):
     template_name = 'core/root_certificate_managing/root_already_exists.html'
-
-
-class CrtNotExist(TemplateView):
-    template_name = 'core/root_certificate_managing/root_doesnt_exist.html'
 
 
 class IndexRootCrt(CertRootExistMixin, TemplateView):
@@ -134,7 +123,11 @@ class GenerateRootCrt(BreadcrumbsMixin, CertRootExistMixin, FormView):
         return super(GenerateRootCrt, self).form_valid(form)
 
 
-class SearchSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormMixin, ListView):
+class Index(RedirectView):
+    url = reverse_lazy('certificate_search')
+
+
+class SearchSiteCrt(BreadcrumbsMixin, FormMixin, ListView):
     form_class = forms.SearchSiteCrt
     model = models.SiteCrt
     template_name = 'core/index.html'
@@ -148,14 +141,10 @@ class SearchSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormMixin, ListView
                 queryset = queryset.filter(cn=cn)
         return queryset
 
-    def get_context_data(self, **kwargs):
-        kwargs['object'] = models.RootCrt.objects.get()
-        return super().get_context_data(**kwargs)
 
-
-class CreateSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
+class CreateSiteCrt(BreadcrumbsMixin, FormView):
     form_class = forms.CreateSiteCrt
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('certificate_search')
     template_name = 'core/certificate/create.html'
 
     def get_breadcrumbs(self):
@@ -173,10 +162,10 @@ class CreateSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
         return super().form_valid(form)
 
 
-class LoadSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView):
+class LoadSiteCrt(BreadcrumbsMixin, FormView):
     template_name = 'core/certificate/upload_existing.html'
     form_class = forms.LoadSiteCrt
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('certificate_search')
 
     def get_breadcrumbs(self):
         return (
@@ -238,10 +227,10 @@ class ViewSiteCrt(BreadcrumbsMixin, FormMixin, DetailView):
         return super().get_context_data(**kwargs)
 
 
-class SiteCrtDelete(BreadcrumbsMixin, CertRootNotExistMixin, DeleteView):
+class SiteCrtDelete(BreadcrumbsMixin, DeleteView):
     model = models.SiteCrt
     template_name = 'core/certificate/delete.html'
-    success_url = reverse_lazy('index')
+    success_url = reverse_lazy('certificate_search')
 
     def get_breadcrumbs(self):
         return (
@@ -259,7 +248,7 @@ class SiteCrtDelete(BreadcrumbsMixin, CertRootNotExistMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class RecreationSiteCrt(BreadcrumbsMixin, CertRootNotExistMixin, FormView, DetailView):
+class RecreationSiteCrt(BreadcrumbsMixin, FormView, DetailView):
     model = models.SiteCrt
     form_class = forms.RecreationSiteCrt
     template_name = 'core/certificate/recreation.html'
