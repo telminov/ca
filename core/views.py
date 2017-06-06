@@ -250,7 +250,7 @@ class SiteCrtDelete(BreadcrumbsMixin, DeleteView):
 
 class RecreationSiteCrt(BreadcrumbsMixin, FormView, DetailView):
     model = models.SiteCrt
-    form_class = forms.RecreationSiteCrt
+    form_class = forms.RecreationCrt
     template_name = 'core/certificate/recreation.html'
 
     def get_breadcrumbs(self):
@@ -278,5 +278,33 @@ class RecreationSiteCrt(BreadcrumbsMixin, FormView, DetailView):
             os.remove(os.path.join(path_root_dir, file))
         ca = CA()
         ca.generate_site_certificate(self.object.cn, form.cleaned_data['validity_period'], pk=self.object.pk)
+        messages.success(self.request, 'Recreation success')
+        return super().form_valid(form)
+
+
+class RecreationRootCrt(BreadcrumbsMixin, FormView, DetailView):
+    model = models.RootCrt
+    form_class = forms.RecreationCrt
+    template_name = 'core/certificate/recreation.html'
+    success_url = reverse_lazy('view_root_crt')
+
+    def get_breadcrumbs(self):
+        return (
+            ('Home', reverse('index')),
+            ('View root crt', reverse('view_root_crt')),
+            ('Recreation root certificate', '')
+        )
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(self.model)
+
+    def form_valid(self, form):
+        self.object = models.RootCrt.objects.get()
+        path_root_dir = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)
+        directory = os.listdir(path_root_dir)
+        for file in directory:
+            os.remove(os.path.join(path_root_dir, file))
+        ca = CA()
+        ca.generate_root_certificate(form.cleaned_data, recreation=True)
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)

@@ -133,5 +133,5 @@ class LoadSiteCrt(forms.Form):
         return crt_text
 
 
-class RecreationSiteCrt(forms.Form):
+class RecreationCrt(forms.Form):
     validity_period = forms.DateField(label='Certificate expiration date')

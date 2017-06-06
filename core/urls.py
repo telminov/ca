@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^has_root_key/$', views.LoadRootCrt.as_view(), name='has_root_key'),
     url(r'^no_root_key/$', views.GenerateRootCrt.as_view(), name='no_root_key'),
     url(r'^view_root_crt/$', views.ViewRootCrt.as_view(), name='view_root_crt'),
+    url(r'^recreation_root_crt/$', views.RecreationRootCrt.as_view(), name='recreation_root_crt'),
     url(r'^delete_root_crt/$', views.RootCrtDelete.as_view(), name='delete_root_crt'),
 
     url(r'^certificates/$', views.SearchSiteCrt.as_view(), name='certificate_search'),
