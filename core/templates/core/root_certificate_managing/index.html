@@ -3,16 +3,14 @@
 {% block title %}Certification authority{% endblock %}
 
 {% block content %}
-    <div class="box">
-        <div class="">
-            <div class="col-sm-12">
-                <h2 class="intro-text text-center">Do you have a <strong>CA root</strong> key ?</h2>
-                <hr class="visible-xs">
-                <p class="text-center">
-                    <a class="btn btn-default" href="{% url 'has_root_key' %}" role="button">Yes</a>
-                    <a class="btn btn-default" href="{% url 'no_root_key' %}" role="button">No</a>
-                </p>
-            </div>
+    <div class="container">
+        <div class="col-xs-12">
+            <h2 class="intro-text text-center">Do you have a <strong>CA root</strong> key ?</h2>
+            <hr class="visible-xs">
+            <p class="text-center">
+                <a class="btn btn-default" href="{% url 'has_root_key' %}" role="button">Yes</a>
+                <a class="btn btn-default" href="{% url 'no_root_key' %}" role="button">No</a>
+            </p>
         </div>
     </div>
 {% endblock %}
