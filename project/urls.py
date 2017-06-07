@@ -4,6 +4,7 @@ from django.contrib.auth.views import login, logout_then_login
 from django.conf import settings
 from django.conf.urls import url, include
 from django.contrib import admin
+from rest_framework.authtoken import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -11,6 +12,7 @@ urlpatterns = [
                             'extra_context': {'brand': settings.BRAND_NAME}},
         name='login'),
     url(r'^logout/', logout_then_login, {'login_url': '/login/?next=/'}, name='logout'),
+    url(r'^api-token-auth/$', views.obtain_auth_token),
     url(r'^', include('core.urls')),
 ]
 

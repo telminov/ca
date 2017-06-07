@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
-from . import views
+from core import views
+from core import rest
 
 urlpatterns = [
     url(r'^$', views.Index.as_view(), name='index'),
@@ -20,4 +21,7 @@ urlpatterns = [
     url(r'^view_crt/(?P<pk>[0-9]+)/$', views.ViewSiteCrt.as_view(), name='view_crt'),
     url(r'^recreation_crt/(?P<pk>[0-9]+)/$', views.RecreationSiteCrt.as_view(), name='recreation_crt'),
     url(r'^delete_crt/(?P<pk>[0-9]+)/$', views.SiteCrtDelete.as_view(), name='delete_crt'),
+
+    url(r'^api/site_crt/create/$', rest.SiteCrtCreate.as_view(), name='rest_site_crt_create'),
+    url(r'^api/site_crt/$', rest.SiteCrtList.as_view(), name='rest_site_crt_list'),
 ]
