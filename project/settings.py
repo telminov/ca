@@ -142,6 +142,7 @@ LOGIN_EXEMPT_URLS = (
     r'/logout(.*)$',
     r'/static/',
     r'/api-token-auth/',
+    r'/api/.*',
 )
 
 BRAND_NAME = 'Your company name'
@@ -154,6 +155,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ROOT_CRT_PATH = 'root'
 
 ROOT_CRT_INTERFACE = [r'/change_root_crt/', r'/has_root_key/', r'/no_root_key/']
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+}
 
 try:
     from project.local_settings import *

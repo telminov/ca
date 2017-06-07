@@ -22,6 +22,6 @@ urlpatterns = [
     url(r'^recreation_crt/(?P<pk>[0-9]+)/$', views.RecreationSiteCrt.as_view(), name='recreation_crt'),
     url(r'^delete_crt/(?P<pk>[0-9]+)/$', views.SiteCrtDelete.as_view(), name='delete_crt'),
 
-    url(r'^api/create_crt/$', rest.CreateCrt.as_view(), name='rest_create_crt'),
-    url(r'^api/get_crt/$', rest.GetCrt.as_view(), name='rest_get_crt'),
+    url(r'^api/site_crt/create/$', rest.SiteCrtCreate.as_view(), name='rest_site_crt_create'),
+    url(r'^api/site_crt/$', rest.SiteCrtList.as_view(), name='rest_site_crt_list'),
 ]
