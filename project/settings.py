@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'bootstrap3',
     'rest_framework',
+    'rest_framework.authtoken',
 
     'core',
 ]
@@ -140,6 +141,7 @@ LOGIN_EXEMPT_URLS = (
     r'/login(.*)$',
     r'/logout(.*)$',
     r'/static/',
+    r'/api-token-auth/',
 )
 
 BRAND_NAME = 'Your company name'
