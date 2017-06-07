@@ -97,7 +97,6 @@ class CA:
         for key, value in data.items():
             if value not in ['', None]:
                 if key != 'validity_period':
-                    print(subj, key, value)
                     setattr(subj, key, value)
 
         req.set_pubkey(pkey)
