@@ -84,18 +84,20 @@ class CA:
 
     @staticmethod
     def create_cert_site(pkey, data, validity_period):
-        with open(os.path.join(settings.MEDIA_ROOT, CA_CERT_FILE)) as f:
+        root_crt = models.RootCrt.objects.get()
+        with open(os.path.join(settings.MEDIA_ROOT, str(root_crt.crt))) as f:
             ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, f.read())
 
-        with open(os.path.join(settings.MEDIA_ROOT, CA_KEY_FILE)) as f:
+        with open(os.path.join(settings.MEDIA_ROOT, str(root_crt.key))) as f:
             ca_key = crypto.load_privatekey(crypto.FILETYPE_PEM, f.read())
 
         req = crypto.X509Req()
         subj = req.get_subject()
 
         for key, value in data.items():
-            if value != '':
+            if value not in ['', None]:
                 if key != 'validity_period':
+                    print(subj, key, value)
                     setattr(subj, key, value)
 
         req.set_pubkey(pkey)
@@ -117,8 +119,8 @@ class CA:
 
         for key, value in date.items():
             if value != '':
-                    if key != 'validity_period':
-                        setattr(subj, key, value)
+                if key != 'validity_period':
+                    setattr(subj, key, value)
 
         cert.gmtime_adj_notBefore(0)
         cert.gmtime_adj_notAfter(validity_period)
