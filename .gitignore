@@ -8,3 +8,6 @@ media/
 htmlcov/
 .coverage
 
+core/__pycache__/
+core/migrations/__pycache__/
+project/__pycache__/
