@@ -12,9 +12,39 @@ textarea {
     line-height: 1.7rem;
 }
 
+.navbar-nav.navbar-center {
+    position: absolute;
+    left: 50%;
+    transform: translatex(-50%);
+}
+
 .breadcrumb {
     margin: 0.3rem 0 0 0;
     background-color: #e5e5e5;
+}
+
+.brand-name {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.auth-links li>strong,
+.auth-links .dropdown-toggle {
+    display: inline-block;
+}
+
+.dropdown {
+    background-color: inherit;
+    color: inherit;
+    display: inline-block;
+}
+
+.gear-btn .glyphicon-cog {
+    margin-right: 0.5rem;
+}
+
+.gear-btn:hover {
+    color: black;
 }
 
 /* content */
