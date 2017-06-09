@@ -56,6 +56,11 @@ textarea {
     text-align: center;
 }
 
+.main-table td:first-of-type,
+.main-table th:first-of-type {
+    text-align: right;
+}
+
 .main-table tr>td {
     vertical-align: middle !important;
 }
