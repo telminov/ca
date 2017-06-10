@@ -73,7 +73,7 @@ class CreateSiteCrt(forms.Form):
         data = cleaned_data.get('cn')
         try:
             models.SiteCrt.objects.get(cn=data)
-            msg = "Common name not unique"
+            msg = "Common name {} not unique".format(data)
             self.add_error('cn', msg)
         except ObjectDoesNotExist:
             pass
@@ -108,7 +108,7 @@ class LoadSiteCrt(forms.Form):
                 try:
                     obj_crt_in_db = models.SiteCrt.objects.get(cn=cert.get_subject().CN)
                     if obj_crt_in_db:
-                        msg = 'Certificate with Common name already exists in db'
+                        msg = 'Certificate with Common name {} already exists in db'.format(cert.get_subject().CN)
                         self.add_error('crt_file', msg)
                 except ObjectDoesNotExist:
                     pass
@@ -124,7 +124,7 @@ class LoadSiteCrt(forms.Form):
                 try:
                     obj_crt_in_db = models.SiteCrt.objects.get(cn=cert.get_subject().CN)
                     if obj_crt_in_db:
-                        msg = 'Certificate with Common name already exists in db'
+                        msg = 'Certificate with Common name {} already exists in db'.format(cert.get_subject().CN)
                         self.add_error('crt_text', msg)
                 except ObjectDoesNotExist:
                     pass

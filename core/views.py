@@ -131,6 +131,12 @@ class SearchSiteCrt(BreadcrumbsMixin, FormMixin, ListView):
     form_class = forms.SearchSiteCrt
     model = models.SiteCrt
     template_name = 'core/index.html'
+    data_method = None
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['data'] = self.request.GET
+        return kwargs
 
     def get_queryset(self):
         queryset = super().get_queryset().order_by('-id')
@@ -138,7 +144,7 @@ class SearchSiteCrt(BreadcrumbsMixin, FormMixin, ListView):
         if form.is_valid():
             cn = form.cleaned_data['cn']
             if cn:
-                queryset = queryset.filter(cn=cn)
+                queryset = queryset.filter(cn__icontains=cn)
         return queryset
 
 
