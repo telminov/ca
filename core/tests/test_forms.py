@@ -155,7 +155,7 @@ class CertificatesCreateForm(TestCase):
 
         response = self.client.post(reverse('certificates_create'), {'cn': '127.0.0.1', 'validity_period': '2019-05-30'})
 
-        self.assertContains(response, 'Common name not unique')
+        self.assertContains(response, 'Common name 127.0.0.1 not unique')
 
 
 class CertificatesUploadExistingForm(TestCase):
@@ -184,7 +184,7 @@ class CertificatesUploadExistingForm(TestCase):
                                                                  'key_file': SimpleUploadedFile('site.key',
                                                                                                 site_key_not_unique_cn)})
 
-        self.assertContains(response, 'Certificate with Common name already exists in db')
+        self.assertContains(response, 'Certificate with Common name 127.0.0.1 already exists in db')
 
     def test_upload_random_text(self):
         self.client.force_login(user=self.user)
@@ -199,4 +199,4 @@ class CertificatesUploadExistingForm(TestCase):
         response = self.client.post(reverse('certificates_upload_existing'), {'crt_text': site_crt_not_unique_cn.decode(),
                                                                  'key_text': site_key_not_unique_cn.decode()})
 
-        self.assertContains(response, 'Certificate with Common name already exists in db')
+        self.assertContains(response, 'Certificate with Common name 127.0.0.1 already exists in db')
