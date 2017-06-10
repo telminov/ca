@@ -128,17 +128,16 @@ class Index(RedirectView):
     url = reverse_lazy('certificate_search')
 
 
-class SearchSiteCrt(BreadcrumbsMixin, FormMixin, ListView):
+class SearchSiteCrt(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
     form_class = forms.SearchSiteCrt
     model = models.SiteCrt
     template_name = 'core/index.html'
-    data_method = None
+    sort_params = ['cn', 'date_start', 'date_end']
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['data'] = self.request.GET
         return kwargs
-    sort_params = ['cn', 'date_start', 'date_end']
 
     def get_queryset(self):
         queryset = super().get_queryset()
