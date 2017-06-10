@@ -30,14 +30,14 @@
                     <th>Expiring date</th>
                     <th>Download</th>
                 </tr>
-                {% for x in object_list %}
+                {% for object in object_list %}
                     <tr>
-                        <td>{{ x.id }}</td>
-                        <td><a href="{% url 'view_crt' pk=x.pk %}">{{ x.cn }}</a></td>
-                        <td class="cn-table-date">{{ x.date_start }}</td>
-                        <td class="cn-table-date">{{ x.date_end }}</td>
-                        <td><a class="btn btn-default" href="{{ x.crt.url }}">crt</a> <a class="btn btn-default"
-                                                                                         href="{{ x.key.url }}">key</a>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="{% url 'view_crt' pk=object.pk %}">{{ object.cn }}</a></td>
+                        <td class="cn-table-date">{{ object.date_start }}</td>
+                        <td class="cn-table-date">{{ object.date_end }}</td>
+                        <td><a class="btn btn-default" href="{{ object.crt.url }}">crt</a> <a class="btn btn-default"
+                                                                                         href="{{ object.key.url }}">key</a>
                         </td>
                     </tr>
                 {% endfor %}
