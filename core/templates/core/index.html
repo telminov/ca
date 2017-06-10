@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load bootstrap3 %}
+{% load djutils %}
 
 {% block title %}Certification authority interface{% endblock %}
 
@@ -24,9 +25,9 @@
             </div>
             <table class="table main-table">
                 <tr>
-                    <th>Common Name</th>
-                    <th>Created</th>
-                    <th>Expiring date</th>
+                    {% sort_th 'cn' 'Common Name' %}
+                    {% sort_th 'date_start' 'Created' %}
+                    {% sort_th 'date_end' 'Expiring date' %}
                     <th>Download</th>
                 </tr>
                 {% for x in object_list %}

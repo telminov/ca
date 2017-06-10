@@ -8,4 +8,5 @@ factory-boy==2.8.1
 raven==6.1.0
 ipython
 gunicorn==19.7.1
-django_filter==1.0.4
+sw-django-utils==0.0.35
+sw-python-utils==0.0.15

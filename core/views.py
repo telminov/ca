@@ -2,6 +2,7 @@ import shutil
 import os
 from datetime import datetime, timedelta
 from OpenSSL import crypto
+from djutils.views.generic import SortMixin
 
 from django.utils import timezone
 from django.conf import settings
@@ -127,13 +128,14 @@ class Index(RedirectView):
     url = reverse_lazy('certificate_search')
 
 
-class SearchSiteCrt(BreadcrumbsMixin, FormMixin, ListView):
+class SearchSiteCrt(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
     form_class = forms.SearchSiteCrt
     model = models.SiteCrt
     template_name = 'core/index.html'
+    sort_params = ['cn', 'date_start', 'date_end']
 
     def get_queryset(self):
-        queryset = super().get_queryset().order_by('-id')
+        queryset = super().get_queryset()
         form = self.form_class(self.request.GET)
         if form.is_valid():
             cn = form.cleaned_data['cn']
