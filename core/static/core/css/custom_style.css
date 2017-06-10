@@ -56,6 +56,11 @@ textarea {
     text-align: center;
 }
 
+.main-table td:nth-child(2),
+.main-table th:nth-child(2) {
+    text-align: left;
+}
+
 .main-table tr>td {
     vertical-align: middle !important;
 }
@@ -104,6 +109,11 @@ textarea {
     margin-top: 1rem;
     margin-bottom: 1rem;
 }
+
+.pagination-block {
+    text-align: center;
+}
+
 /* footer */
 footer {
     margin-top: 2rem;
