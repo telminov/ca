@@ -24,6 +24,7 @@
             </div>
             <table class="table main-table">
                 <tr>
+                    <th>#</th>
                     <th>Common Name</th>
                     <th>Created</th>
                     <th>Expiring date</th>
@@ -31,6 +32,7 @@
                 </tr>
                 {% for x in object_list %}
                     <tr>
+                        <td>{{ x.id }}</td>
                         <td><a href="{% url 'view_crt' pk=x.pk %}">{{ x.cn }}</a></td>
                         <td class="cn-table-date">{{ x.date_start }}</td>
                         <td class="cn-table-date">{{ x.date_end }}</td>
