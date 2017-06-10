@@ -16,7 +16,7 @@ class CA:
         pkey = self.create_key_pair()
         validity_period = self.calculate_validity_period(data['validity_period'])
         if recreation:
-            cert = self.create_cert_root(pkey, self.generate_subj_recreation_root_crt(), validity_period)
+            cert = self.create_cert_root(pkey, self.generate_subj_root_crt_recreate(), validity_period)
         else:
             cert = self.create_cert_root(pkey, self.generate_subj_root_crt(data), validity_period)
         self.write_cert_root(cert, pkey)
@@ -52,7 +52,7 @@ class CA:
         }
         return options
 
-    def generate_subj_recreation_root_crt(self):
+    def generate_subj_root_crt_recreate(self):
         root = models.RootCrt.objects.get()
         options = {
             'C': root.country,

@@ -123,7 +123,7 @@ class RootCrtForm(TestCase):
     def test_upload_random_file(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('has_root_key'), {'crt': SimpleUploadedFile('test.txt', b'test'),
+        response = self.client.post(reverse('root_crt_upload_existing'), {'crt': SimpleUploadedFile('test.txt', b'test'),
                                                               'key': SimpleUploadedFile('tests.txt', b'test')})
 
         self.assertContains(response, 'Please load valid certificate and key')
@@ -131,7 +131,7 @@ class RootCrtForm(TestCase):
     def test_upload_crt_without_required_subj(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('has_root_key'), {'crt': SimpleUploadedFile('rootCA.crt',
+        response = self.client.post(reverse('root_crt_upload_existing'), {'crt': SimpleUploadedFile('rootCA.crt',
                                                                                         root_crt_without_required_subj),
                                                               'key': SimpleUploadedFile('rootCA.key',
                                                                                         root_key_without_required_sub)})
@@ -140,7 +140,7 @@ class RootCrtForm(TestCase):
                             'Please enter required field in certificate: Country, State, Location, Organization')
 
 
-class CreateSiteCrtForm(TestCase):
+class CertificatesCreateForm(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -150,15 +150,15 @@ class CreateSiteCrtForm(TestCase):
         factories.RootCrt.create()
         factories.SiteCrt.create()
 
-    def test_create_crt_not_unique_cn(self):
+    def test_certificates_create_not_unique_cn(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('create_crt'), {'cn': '127.0.0.1', 'validity_period': '2019-05-30'})
+        response = self.client.post(reverse('certificates_create'), {'cn': '127.0.0.1', 'validity_period': '2019-05-30'})
 
         self.assertContains(response, 'Common name not unique')
 
 
-class LoadSiteCrtForm(TestCase):
+class CertificatesUploadExistingForm(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -171,7 +171,7 @@ class LoadSiteCrtForm(TestCase):
     def test_upload_random_files(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('upload_existing'), {'crt_file': SimpleUploadedFile('test.txt', b'test'),
+        response = self.client.post(reverse('certificates_upload_existing'), {'crt_file': SimpleUploadedFile('test.txt', b'test'),
                                                                  'key_file': SimpleUploadedFile('tests.txt', b'test')})
 
         self.assertContains(response, 'Please load valid certificate and key')
@@ -179,7 +179,7 @@ class LoadSiteCrtForm(TestCase):
     def test_upload_crt_file_not_unique_cn(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('upload_existing'), {'crt_file': SimpleUploadedFile('site.crt',
+        response = self.client.post(reverse('certificates_upload_existing'), {'crt_file': SimpleUploadedFile('site.crt',
                                                                                                 site_crt_not_unique_cn),
                                                                  'key_file': SimpleUploadedFile('site.key',
                                                                                                 site_key_not_unique_cn)})
@@ -189,14 +189,14 @@ class LoadSiteCrtForm(TestCase):
     def test_upload_random_text(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('upload_existing'), {'crt_text': 'test', 'key_text': 'test'})
+        response = self.client.post(reverse('certificates_upload_existing'), {'crt_text': 'test', 'key_text': 'test'})
 
         self.assertContains(response, 'Please load valid certificate and key')
 
     def test_upload_crt_text_not_unique_cn(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('upload_existing'), {'crt_text': site_crt_not_unique_cn.decode(),
+        response = self.client.post(reverse('certificates_upload_existing'), {'crt_text': site_crt_not_unique_cn.decode(),
                                                                  'key_text': site_key_not_unique_cn.decode()})
 
         self.assertContains(response, 'Certificate with Common name already exists in db')

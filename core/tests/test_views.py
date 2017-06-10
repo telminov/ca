@@ -9,7 +9,7 @@ from core.tests import factories
 from core import models
 
 
-class CrtExistsView(TestCase):
+class RootCrtExists(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -29,10 +29,10 @@ class CrtExistsView(TestCase):
         response = self.client.get(reverse('root_crt_exists'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/root_certificate_managing/root_already_exists.html')
+        self.assertTemplateUsed(response, 'core/root_certificate_managing/already_exists.html')
 
 
-class IndexRootCrtView(TestCase):
+class RootCrtView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -41,27 +41,27 @@ class IndexRootCrtView(TestCase):
         )
 
     def test_auth(self):
-        response = self.client.get(reverse('index_root'))
-        redirect_url = reverse('login') + '?next=' + reverse('index_root')
+        response = self.client.get(reverse('root_crt'))
+        redirect_url = reverse('login') + '?next=' + reverse('root_crt')
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('index_root'))
+        response = self.client.get(reverse('root_crt'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/root_certificate_managing/index.html')
+        self.assertTemplateUsed(response, 'core/root_certificate_managing/certificates.html')
 
     def test_root_crt_exists(self):
         factories.RootCrt.create()
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('index_root'))
+        response = self.client.get(reverse('root_crt'))
 
         self.assertRedirects(response, reverse('root_crt_exists'))
 
 
-class LoadRootCrtView(TestCase):
+class RootCrtUploadExistingView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -70,23 +70,23 @@ class LoadRootCrtView(TestCase):
         )
 
     def test_auth(self):
-        response = self.client.get(reverse('has_root_key'))
-        redirect_url = reverse('login') + '?next=' + reverse('has_root_key')
+        response = self.client.get(reverse('root_crt_upload_existing'))
+        redirect_url = reverse('login') + '?next=' + reverse('root_crt_upload_existing')
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('has_root_key'))
+        response = self.client.get(reverse('root_crt_upload_existing'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/root_certificate_managing/has_root_key.html')
+        self.assertTemplateUsed(response, 'core/root_certificate_managing/upload_existing.html')
 
     def test_context(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('has_root_key'))
+        response = self.client.get(reverse('root_crt_upload_existing'))
 
-        self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index_root')))
+        self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('root_crt')))
         self.assertEqual(response.context['breadcrumbs'][1], ('Load root certificate', ''))
 
     # в первом приближении
@@ -94,19 +94,19 @@ class LoadRootCrtView(TestCase):
         self.client.force_login(user=self.user)
         crt = SimpleUploadedFile('rootCA.crt', factories.root_crt_all_fields)
         key = SimpleUploadedFile('rootCA.key', factories.root_key_all_fields)
-        response = self.client.post(reverse('has_root_key'), {'crt': crt, 'key': key})
+        response = self.client.post(reverse('root_crt_upload_existing'), {'crt': crt, 'key': key})
 
-        self.assertRedirects(response, reverse('view_root_crt'))
+        self.assertRedirects(response, reverse('root_crt_view'))
 
     def test_root_crt_exists(self):
         factories.RootCrt.create()
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('has_root_key'))
+        response = self.client.get(reverse('root_crt_upload_existing'))
 
         self.assertRedirects(response, reverse('root_crt_exists'))
 
 
-class ViewRootCrtView(TestCase):
+class RootCrtView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -116,23 +116,23 @@ class ViewRootCrtView(TestCase):
         factories.RootCrt.create()
 
     def test_auth(self):
-        response = self.client.get(reverse('has_root_key'))
-        redirect_url = reverse('login') + '?next=' + reverse('has_root_key')
+        response = self.client.get(reverse('root_crt_upload_existing'))
+        redirect_url = reverse('login') + '?next=' + reverse('root_crt_upload_existing')
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('view_root_crt'))
+        response = self.client.get(reverse('root_crt_view'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/root_certificate_managing/view_root_files.html')
+        self.assertTemplateUsed(response, 'core/root_certificate_managing/view.html')
 
     def test_context(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('view_root_crt'))
+        response = self.client.get(reverse('root_crt_view'))
 
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, factories.root_crt_all_fields).get_subject()
 
@@ -144,7 +144,7 @@ class ViewRootCrtView(TestCase):
     def test_initial_form(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('view_root_crt'))
+        response = self.client.get(reverse('root_crt_view'))
 
         self.assertIn(factories.root_crt_all_fields.decode(), str(response.context['form']))
         self.assertIn(factories.root_key_all_fields.decode(), str(response.context['form']))
@@ -153,9 +153,9 @@ class ViewRootCrtView(TestCase):
         models.RootCrt.objects.all().delete()
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('view_root_crt'))
+        response = self.client.get(reverse('root_crt_view'))
 
-        self.assertRedirects(response, reverse('index_root'))
+        self.assertRedirects(response, reverse('root_crt'))
 
 
 class RootCrtDeleteView(TestCase):
@@ -168,15 +168,15 @@ class RootCrtDeleteView(TestCase):
         factories.RootCrt.create()
 
     def test_auth(self):
-        response = self.client.get(reverse('delete_root_crt'))
-        redirect_url = reverse('login') + '?next=' + reverse('delete_root_crt')
+        response = self.client.get(reverse('root_crt_delete'))
+        redirect_url = reverse('login') + '?next=' + reverse('root_crt_delete')
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('delete_root_crt'))
+        response = self.client.get(reverse('root_crt_delete'))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/root_certificate_managing/delete.html')
@@ -185,30 +185,30 @@ class RootCrtDeleteView(TestCase):
         models.RootCrt.objects.all().delete()
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('delete_root_crt'))
+        response = self.client.get(reverse('root_crt_delete'))
 
-        self.assertRedirects(response, reverse('index_root'))
+        self.assertRedirects(response, reverse('root_crt'))
 
     # в первом приближении
     def test_delete(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('delete_root_crt'))
+        response = self.client.post(reverse('root_crt_delete'))
 
         self.assertEqual(models.RootCrt.objects.all().count(), 0)
-        self.assertRedirects(response, reverse('index_root'))
+        self.assertRedirects(response, reverse('root_crt'))
 
     def test_context(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('delete_root_crt'))
+        response = self.client.get(reverse('root_crt_delete'))
 
         self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index')))
-        self.assertEqual(response.context['breadcrumbs'][1], ('View certificate', reverse('view_root_crt')))
+        self.assertEqual(response.context['breadcrumbs'][1], ('View certificate', reverse('root_crt_view')))
         self.assertEqual(response.context['breadcrumbs'][2], ('Delete root certificate', ''))
 
 
-class GenerateRootCrtView(TestCase):
+class RootCrtGenerateNewView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -217,49 +217,49 @@ class GenerateRootCrtView(TestCase):
         )
 
     def test_auth(self):
-        response = self.client.get(reverse('no_root_key'))
-        redirect_url = reverse('login') + '?next=' + reverse('no_root_key')
+        response = self.client.get(reverse('root_crt_generate_new'))
+        redirect_url = reverse('login') + '?next=' + reverse('root_crt_generate_new')
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('no_root_key'))
+        response = self.client.get(reverse('root_crt_generate_new'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/root_certificate_managing/no_root_key.html')
+        self.assertTemplateUsed(response, 'core/root_certificate_managing/generate_new.html')
 
     def test_root_crt_exists(self):
         factories.RootCrt.create()
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('no_root_key'))
+        response = self.client.get(reverse('root_crt_generate_new'))
 
         self.assertRedirects(response, reverse('root_crt_exists'))
 
     def test_context(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('no_root_key'))
+        response = self.client.get(reverse('root_crt_generate_new'))
 
-        self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index_root')))
+        self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('root_crt')))
         self.assertEqual(response.context['breadcrumbs'][1], ('Generate root certificate', ''))
 
     # в первом приближеии
     def test_success_url(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('no_root_key'), {'country': 'ru', 'state': 'moscow', 'location': 'moscow',
+        response = self.client.post(reverse('root_crt_generate_new'), {'country': 'ru', 'state': 'moscow', 'location': 'moscow',
                                                              'organization': 'soft-way', 'organizational_unit_name':
                                                                  'soft-way', 'common_name': '127.0.0.1', 'email':
                                                                  'test44@gmail.com', 'validity_period': '2032-05-29'})
 
         self.assertEqual(models.RootCrt.objects.all().count(), 1)
-        self.assertRedirects(response, reverse('view_root_crt'))
+        self.assertRedirects(response, reverse('root_crt_view'))
 
 
-class SearchSiteCrt(TestCase):
+class CertificatesSearch(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -269,38 +269,38 @@ class SearchSiteCrt(TestCase):
         factories.RootCrt.create()
 
     def test_auth(self):
-        response = self.client.get(reverse('certificate_search'))
-        redirect_url = reverse('login') + '?next=' + reverse('certificate_search')
+        response = self.client.get(reverse('certificates_search'))
+        redirect_url = reverse('login') + '?next=' + reverse('certificates_search')
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('certificate_search'))
+        response = self.client.get(reverse('certificates_search'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/index.html')
+        self.assertTemplateUsed(response, 'core/certificates.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('certificate_search'))
+        response = self.client.get(reverse('certificates_search'))
 
-        self.assertRedirects(response, reverse('index_root'))
+        self.assertRedirects(response, reverse('root_crt'))
 
     def test_search(self):
         factories.SiteCrt.create()
         factories.SiteCrt.create(cn='127.0.0.2')
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('certificate_search'), {'cn': '127.0.0.1'})
+        response = self.client.get(reverse('certificates_search'), {'cn': '127.0.0.1'})
 
         self.assertEqual(len(response.context['object_list']), 1)
 
 
-class CreateSiteCrtView(TestCase):
+class CertificatesCreateView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -310,14 +310,14 @@ class CreateSiteCrtView(TestCase):
         factories.RootCrt.create()
 
     def test_auth(self):
-        response = self.client.get(reverse('create_crt'))
-        redirect_url = reverse('login') + '?next=' + reverse('create_crt')
+        response = self.client.get(reverse('certificates_create'))
+        redirect_url = reverse('login') + '?next=' + reverse('certificates_create')
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('create_crt'))
+        response = self.client.get(reverse('certificates_create'))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/certificate/create.html')
@@ -325,26 +325,26 @@ class CreateSiteCrtView(TestCase):
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('create_crt'))
+        response = self.client.get(reverse('certificates_create'))
 
-        self.assertRedirects(response, reverse('index_root'))
+        self.assertRedirects(response, reverse('root_crt'))
 
     def test_success_url(self):
         self.client.force_login(user=self.user)
-        response = self.client.post(reverse('create_crt'), {'cn': '127.0.0.1', 'validity_period': '2019-05-29'})
+        response = self.client.post(reverse('certificates_create'), {'cn': '127.0.0.1', 'validity_period': '2019-05-29'})
 
-        self.assertRedirects(response, reverse('certificate_search'))
+        self.assertRedirects(response, reverse('certificates_search'))
         self.assertEqual(models.SiteCrt.objects.get().cn, '127.0.0.1')
 
     def test_context(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('create_crt'))
+        response = self.client.get(reverse('certificates_create'))
 
         self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index')))
         self.assertEqual(response.context['breadcrumbs'][1], ('Create new certificate', ''))
 
 
-class LoadSiteCrtView(TestCase):
+class CertificatesUploadExistingView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -354,14 +354,14 @@ class LoadSiteCrtView(TestCase):
         factories.RootCrt.create()
 
     def test_auth(self):
-        response = self.client.get(reverse('upload_existing'))
-        redirect_url = reverse('login') + '?next=' + reverse('upload_existing')
+        response = self.client.get(reverse('certificates_upload_existing'))
+        redirect_url = reverse('login') + '?next=' + reverse('certificates_upload_existing')
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('upload_existing'))
+        response = self.client.get(reverse('certificates_upload_existing'))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/certificate/upload_existing.html')
@@ -369,13 +369,13 @@ class LoadSiteCrtView(TestCase):
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('upload_existing'))
+        response = self.client.get(reverse('certificates_upload_existing'))
 
-        self.assertRedirects(response, reverse('index_root'))
+        self.assertRedirects(response, reverse('root_crt'))
 
     def test_context(self):
         self.client.force_login(user=self.user)
-        response = self.client.get(reverse('upload_existing'))
+        response = self.client.get(reverse('certificates_upload_existing'))
 
         self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index')))
         self.assertEqual(response.context['breadcrumbs'][1], ('Load exists certificate', ''))
@@ -383,23 +383,23 @@ class LoadSiteCrtView(TestCase):
     # в первом приближении
     def test_form_valid_files(self):
         self.client.force_login(user=self.user)
-        response = self.client.post(reverse('upload_existing'),
+        response = self.client.post(reverse('certificates_upload_existing'),
                                     {'crt_file': SimpleUploadedFile('test.crt', factories.site_crt_all_fields),
                                      'key_file': SimpleUploadedFile('test.key', factories.site_key_all_fields)})
 
-        self.assertRedirects(response, reverse('certificate_search'))
+        self.assertRedirects(response, reverse('certificates_search'))
         self.assertEqual(models.SiteCrt.objects.all().count(), 1)
 
     def test_form_valid_text(self):
         self.client.force_login(user=self.user)
-        response = self.client.post(reverse('upload_existing'), {'crt_text': factories.site_crt_all_fields.decode(),
+        response = self.client.post(reverse('certificates_upload_existing'), {'crt_text': factories.site_crt_all_fields.decode(),
                                                                  'key_text': factories.site_key_all_fields.decode()})
 
-        self.assertRedirects(response, reverse('certificate_search'))
+        self.assertRedirects(response, reverse('certificates_search'))
         self.assertEqual(models.SiteCrt.objects.all().count(), 1)
 
 
-class ViewSiteCrtView(TestCase):
+class CertificatesView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -410,15 +410,15 @@ class ViewSiteCrtView(TestCase):
         factories.SiteCrt.create()
 
     def test_auth(self):
-        response = self.client.get(reverse('view_crt', kwargs={'pk': '1'}))
-        redirect_url = reverse('login') + '?next=' + reverse('view_crt', kwargs={'pk': '1'})
+        response = self.client.get(reverse('certificates_view', kwargs={'pk': '1'}))
+        redirect_url = reverse('login') + '?next=' + reverse('certificates_view', kwargs={'pk': '1'})
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('view_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_view', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/certificate/view.html')
@@ -426,7 +426,7 @@ class ViewSiteCrtView(TestCase):
     def test_context(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('view_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_view', kwargs={'pk': '1'}))
 
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, factories.site_crt_all_fields).get_subject()
 
@@ -438,7 +438,7 @@ class ViewSiteCrtView(TestCase):
     def test_initial_form(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('view_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_view', kwargs={'pk': '1'}))
 
         self.assertIn(factories.site_crt_all_fields.decode(), str(response.context['form']))
         self.assertIn(factories.site_key_all_fields.decode(), str(response.context['form']))
@@ -446,12 +446,12 @@ class ViewSiteCrtView(TestCase):
     def test_root_crt_not_exists(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('view_crt', kwargs={'pk': '2'}))
+        response = self.client.get(reverse('certificates_view', kwargs={'pk': '2'}))
 
         self.assertEqual(response.status_code, 404)
 
 
-class SiteCrtDeleteView(TestCase):
+class CertificatesDeleteView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -462,15 +462,15 @@ class SiteCrtDeleteView(TestCase):
         factories.SiteCrt.create()
 
     def test_auth(self):
-        response = self.client.get(reverse('delete_crt', kwargs={'pk': '1'}))
-        redirect_url = reverse('login') + '?next=' + reverse('delete_crt', kwargs={'pk': '1'})
+        response = self.client.get(reverse('certificates_delete', kwargs={'pk': '1'}))
+        redirect_url = reverse('login') + '?next=' + reverse('certificates_delete', kwargs={'pk': '1'})
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('delete_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_delete', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/certificate/delete.html')
@@ -479,7 +479,7 @@ class SiteCrtDeleteView(TestCase):
         models.SiteCrt.objects.all().delete()
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('delete_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_delete', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 404)
 
@@ -487,31 +487,31 @@ class SiteCrtDeleteView(TestCase):
         models.RootCrt.objects.all().delete()
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('delete_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_delete', kwargs={'pk': '1'}))
 
-        self.assertRedirects(response, reverse('index_root'))
+        self.assertRedirects(response, reverse('root_crt'))
 
     # в первом приближении
     def test_delete(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('delete_crt', kwargs={'pk': '1'}))
+        response = self.client.post(reverse('certificates_delete', kwargs={'pk': '1'}))
 
         self.assertEqual(models.SiteCrt.objects.all().count(), 0)
-        self.assertRedirects(response, reverse('certificate_search'))
+        self.assertRedirects(response, reverse('certificates_search'))
 
     def test_context(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('delete_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_delete', kwargs={'pk': '1'}))
 
         self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index')))
         self.assertEqual(response.context['breadcrumbs'][1], ('View %s' % models.SiteCrt.objects.get().cn,
-                                                              reverse('view_crt', kwargs={'pk': 1})))
+                                                              reverse('certificates_view', kwargs={'pk': 1})))
         self.assertEqual(response.context['breadcrumbs'][2], ('Delete %s' % models.SiteCrt.objects.get().cn, ''))
 
 
-class RecreationSiteCrtView(TestCase):
+class CertificatesRecreateView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -522,50 +522,50 @@ class RecreationSiteCrtView(TestCase):
         factories.SiteCrt.create()
 
     def test_auth(self):
-        response = self.client.get(reverse('recreation_crt', kwargs={'pk': '1'}))
-        redirect_url = reverse('login') + '?next=' + reverse('recreation_crt', kwargs={'pk': '1'})
+        response = self.client.get(reverse('certificates_recreate', kwargs={'pk': '1'}))
+        redirect_url = reverse('login') + '?next=' + reverse('certificates_recreate', kwargs={'pk': '1'})
 
         self.assertRedirects(response, redirect_url)
 
     def test_smoke(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('recreation_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_recreate', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/certificate/recreation.html')
+        self.assertTemplateUsed(response, 'core/certificate/recreate.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('recreation_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_recreate', kwargs={'pk': '1'}))
 
-        self.assertRedirects(response, reverse('index_root'))
+        self.assertRedirects(response, reverse('root_crt'))
 
     def test_site_crt_not_exists(self):
         models.SiteCrt.objects.all().delete()
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('recreation_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_recreate', kwargs={'pk': '1'}))
 
         self.assertEqual(response.status_code, 404)
 
     def test_context(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.get(reverse('recreation_crt', kwargs={'pk': '1'}))
+        response = self.client.get(reverse('certificates_recreate', kwargs={'pk': '1'}))
 
         self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index')))
         self.assertEqual(response.context['breadcrumbs'][1], ('View %s' % models.SiteCrt.objects.get().cn,
-                         reverse('view_crt', kwargs={'pk': '1'})))
+                         reverse('certificates_view', kwargs={'pk': '1'})))
         self.assertEqual(response.context['breadcrumbs'][2], ('Recreation certificate', ''))
 
     # в первом приближении
     def test_recreation(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('recreation_crt', kwargs={'pk': '1'}), {'validity_period': '2020-05-29'})
+        response = self.client.post(reverse('certificates_recreate', kwargs={'pk': '1'}), {'validity_period': '2020-05-29'})
 
-        self.assertRedirects(response, reverse('view_crt', kwargs={'pk': '1'}))
+        self.assertRedirects(response, reverse('certificates_view', kwargs={'pk': '1'}))
         self.assertEqual(str(models.SiteCrt.objects.get().date_end)[:10], '2020-05-29')

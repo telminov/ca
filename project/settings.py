@@ -154,7 +154,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ROOT_CRT_PATH = 'root'
 
-ROOT_CRT_INTERFACE = [r'/change_root_crt/', r'/has_root_key/', r'/no_root_key/']
+ROOT_CRT_INTERFACE = [r'/root_crt/', r'/root_crt_upload_existing/', r'/generate_new/']
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),

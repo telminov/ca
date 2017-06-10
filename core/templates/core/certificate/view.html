@@ -43,9 +43,9 @@
             <div class="text-center col-xs-12">
                 <div class="row">
                     <a href="{% url 'index' %}" role="button" class="btn btn-success pull-right submit-view-crt-btn">Submit</a>
-                    <a href="{% url 'recreation_crt' pk=object.pk %}" role="button"
+                    <a href="{% url 'certificates_recreate' pk=object.pk %}" role="button"
                        class="btn btn-default pull-right">Re-creation</a>
-                    <a href="{% url 'delete_crt' pk=object.pk %}" role="button"
+                    <a href="{% url 'certificates_delete' pk=object.pk %}" role="button"
                        class="btn btn-danger pull-left">Delete</a>
                 </div>
             </div>

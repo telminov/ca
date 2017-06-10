@@ -64,7 +64,7 @@ class ViewCrtText(forms.Form):
     key = forms.CharField(widget=forms.Textarea(attrs={'rows': '8'}))
 
 
-class CreateSiteCrt(forms.Form):
+class CertificatesCreate(forms.Form):
     cn = forms.CharField(required=False, label='Common name')
     validity_period = forms.DateField(label='Certificate expiration date')
 
@@ -80,11 +80,11 @@ class CreateSiteCrt(forms.Form):
         return cleaned_data
 
 
-class SearchSiteCrt(forms.Form):
+class CertificatesSearch(forms.Form):
     cn = forms.CharField(required=False, label='Common name')
 
 
-class LoadSiteCrt(forms.Form):
+class CertificatesUploadExisting(forms.Form):
     crt_file = forms.FileField(required=False, label='certificate .crt file')
     key_file = forms.FileField(required=False, label='certificate .key file')
     crt_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Certificate')
