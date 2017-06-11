@@ -189,3 +189,55 @@ class CA:
             date_end=timezone.now() + datetime.timedelta(seconds=validity_period)
         )
         return site_crt
+
+
+path_root_key = os.path.relpath(os.path.join(settings.MEDIA_ROOT, CA_KEY_FILE))
+path_root_crt = os.path.relpath(os.path.join(settings.MEDIA_ROOT, CA_CERT_FILE))
+
+
+class CAOPEN:
+    def generate_root_crt(self, data):
+        self.create_pkey()
+        self.create_root_crt(self.generate_subj_root_crt(data))
+        self.create_model_root_crt(data)
+
+    def create_root_crt(self, data):
+        command_generate_root_crt = 'openssl req -x509 -new -key {path_key} -days 10000 -out {path_crt}'.format(
+            path_key=path_root_key, path_crt=path_root_crt)
+
+        command_subj_root_crt = ' -subj "'
+        for key, value in data.items():
+            if value not in ['', None] and key != 'validity_period':
+                command_subj_root_crt += '/{key}={value}'.format(key=key, value=value)
+        command_subj_root_crt += '"'
+
+        subprocess.call(command_generate_root_crt + command_subj_root_crt, shell=True)
+
+    def generate_subj_root_crt(self, data):
+        options = {
+            'C': data['country'],
+            'ST': data['state'],
+            'L': data['location'],
+            'O': data['organization'],
+            'OU': data['organizational_unit_name'],
+            'CN': data['common_name'],
+            'emailAddress': data['email'],
+        }
+        return options
+
+    def create_pkey(self):
+        command_generate_key = 'openssl genrsa -out {path} 2048'.format(path=path_root_key)
+        subprocess.call(command_generate_key, shell=True)
+
+    def create_model_root_crt(self, data):
+        root_crt = models.RootCrt.objects.create(
+            key=CA_KEY_FILE,
+            crt=CA_CERT_FILE,
+            country=data['country'],
+            state=data['state'],
+            location=data['location'],
+            organization=data['organization'],
+            organizational_unit_name=data['organizational_unit_name'],
+            email=data['email']
+        )
+        return root_crt
