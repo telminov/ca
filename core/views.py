@@ -13,7 +13,7 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView, ListView, RedirectView
 from django.views.generic.edit import FormMixin, ContextMixin
 
-from core.utils import CA
+from core.utils import CAOPEN, CA
 from core import forms
 from core import models
 
@@ -119,8 +119,8 @@ class GenerateRootCrt(BreadcrumbsMixin, CertRootExistMixin, FormView):
         )
 
     def form_valid(self, form):
-        ca = CA()
-        ca.generate_root_certificate(form.cleaned_data)
+        ca = CAOPEN()
+        ca.generate_root_crt(form.cleaned_data)
         return super(GenerateRootCrt, self).form_valid(form)
 
 
@@ -164,8 +164,8 @@ class CreateSiteCrt(BreadcrumbsMixin, FormView):
         return {'validity_period': timezone.now() + timedelta(days=settings.VALIDITY_PERIOD_CRT)}
 
     def form_valid(self, form):
-        ca = CA()
-        ca.generate_site_certificate(form.cleaned_data['cn'], form.cleaned_data['validity_period'])
+        ca = CAOPEN()
+        ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'])
         return super().form_valid(form)
 
 
@@ -283,8 +283,8 @@ class RecreationSiteCrt(BreadcrumbsMixin, FormView, DetailView):
         directory = os.listdir(path_root_dir)
         for file in directory:
             os.remove(os.path.join(path_root_dir, file))
-        ca = CA()
-        ca.generate_site_certificate(self.object.cn, form.cleaned_data['validity_period'], pk=self.object.pk)
+        ca = CAOPEN()
+        ca.generate_site_crt(self.object.cn, form.cleaned_data['validity_period'])
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)
 
@@ -311,7 +311,7 @@ class RecreationRootCrt(BreadcrumbsMixin, FormView, DetailView):
         directory = os.listdir(path_root_dir)
         for file in directory:
             os.remove(os.path.join(path_root_dir, file))
-        ca = CA()
-        ca.generate_root_certificate(form.cleaned_data, recreation=True)
+        ca = CAOPEN()
+        ca.generate_root_crt(form.cleaned_data, recreation=True)
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)

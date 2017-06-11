@@ -11,9 +11,17 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token.objects.create(user=instance)
 
 
+def directory_path_root_key(instance, filename):
+    return settings.ROOT_CRT_PATH + '/rootCA.key'
+
+
+def directory_path_root_crt(instance, filename):
+    return settings.ROOT_CRT_PATH + '/rootCA.crt'
+
+
 class RootCrt(models.Model):
-    key = models.FileField(upload_to=settings.ROOT_CRT_PATH)
-    crt = models.FileField(upload_to=settings.ROOT_CRT_PATH)
+    key = models.FileField(upload_to=directory_path_root_key)
+    crt = models.FileField(upload_to=directory_path_root_crt)
     country = models.CharField(max_length=2)
     state = models.CharField(max_length=32)
     location = models.CharField(max_length=128)
@@ -22,13 +30,17 @@ class RootCrt(models.Model):
     email = models.EmailField(blank=True, null=True, max_length=128)
 
 
-def directory_path(instance, filename):
-    return '{cn}/{filename}'.format(cn=instance.cn, filename=filename)
+def directory_path_key(instance, filename):
+    return '{cn}/{cn}.key'.format(cn=instance.cn)
+
+
+def directory_path_crt(instance, filename):
+    return '{cn}/{cn}.crt'.format(cn=instance.cn)
 
 
 class SiteCrt(models.Model):
-    key = models.FileField(upload_to=directory_path)
-    crt = models.FileField(upload_to=directory_path)
+    key = models.FileField(upload_to=directory_path_key)
+    crt = models.FileField(upload_to=directory_path_crt)
     cn = models.CharField(max_length=256, unique=True)
     date_start = models.DateTimeField(auto_now_add=True)
     date_end = models.DateTimeField()
