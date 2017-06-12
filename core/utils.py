@@ -1,6 +1,7 @@
 import datetime
 import os
 import subprocess
+import shlex
 from OpenSSL import crypto
 
 from django.utils import timezone
@@ -211,15 +212,20 @@ class CAOPEN:
         else:
             self.create_root_crt(self.generate_subj_recreation_root_crt(), validity_period)
 
-    def generate_site_crt(self, cn, validity_period):
+    def generate_site_crt(self, cn, validity_period, pk=None, alt_name='DNS'):
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
             os.mkdir(os.path.join(settings.MEDIA_ROOT, cn))
 
-        path = os.path.realpath(settings.MEDIA_ROOT + '/' + cn + '/' + cn)
+        path = os.path.relpath(settings.MEDIA_ROOT + '/' + cn + '/' + cn)
         self.create_pkey(path + '.key')
-        self.create_req_crt(self.generate_subj_site_crt(cn), path)
+        self.create_config_crt(self.generate_subj_site_crt(cn))
+        self.create_extfile_crt(cn, alt_name)
+        self.create_req_crt(path)
         self.create_site_crt(path, self.calculate_validity_period(validity_period))
-        self.create_model_site_crt(cn, self.calculate_validity_period(validity_period))
+        if not pk:
+            self.create_model_site_crt(cn, self.calculate_validity_period(validity_period))
+        else:
+            self.recreation_site_crt(cn, pk, self.calculate_validity_period(validity_period))
 
     def create_root_crt(self, data, validity_period):
         command_generate_root_crt = 'openssl req -x509 -new -key {path_key} -days {validity_period} -out {path_crt}'.format(
@@ -233,31 +239,38 @@ class CAOPEN:
 
         subprocess.call(command_generate_root_crt + command_subj_root_crt, shell=True)
 
-    def create_req_crt(self, data, path):
-        command_generate_req = 'openssl req -new -key {path_key} -out {path_csr}'.format(path_key=path + '.key',
-                                                                                         path_csr=path + '.csr')
+    def create_req_crt(self, path):
+        command_generate_req = '/bin/bash -c "openssl req -new -key {path_key} -out {path_csr} -config <( cat {path_config} )"'.format(
+            path_key=path + '.key', path_csr=path + '.csr', path_config=path + '.cnf')
 
-        command_subj_crt = ' -subj "'
+        print(command_generate_req)
+        subprocess.check_call(command_generate_req, shell=True)
+
+    def create_extfile_crt(self, cn, alt_name):
+        ext = ['authorityKeyIdentifier=keyid,issuer\n', 'basicConstraints=CA:FALSE\n',
+                  'keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment\n',
+                  'subjectAltName = @alt_names\n', '\n', '[alt_names]\n', '{alt_name}.1 = {cn}\n'.format(alt_name=alt_name,
+                                                                                                         cn=cn)]
+        with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.ext'), 'wb') as f:
+            for x in ext:
+                f.write(x.encode())
+
+    def create_config_crt(self, data):
+        config = ['[req]\n', 'default_bits = 2048\n', 'prompt = no\n', 'default_md = sha256\n',
+                  'distinguished_name = dn\n', '\n', '[dn]\n']
         for key, value in data.items():
-            if value not in ['', None]:
-                command_subj_crt += '/{key}={value}'.format(key=key, value=value)
-        command_subj_crt += '"'
+            if value not in ['', None] and key != 'validity_period':
+                config.append('{key}={value}\n'.format(key=key, value=value))
 
-        subprocess.call(command_generate_req + command_subj_crt, shell=True)
-
-    # def create_config_site_crt(self, cn):
-    #     config = ['authorityKeyIdentifier=keyid,issuer\n', 'basicConstraints=CA:FALSE\n',
-    #               'keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment\n',
-    #               'subjectAltName = @alt_names\n', '\n', '[alt_names]\n', 'DNS.1 = {cn}\n'.format(cn=cn)]
-    #     with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.ext'), 'wb') as f:
-    #         for x in config:
-    #             f.write(x.encode())
+        with open(os.path.join(settings.MEDIA_ROOT, data['CN'], data['CN'] + '.cnf'), 'wb') as f:
+            for x in config:
+                f.write(x.encode())
 
     def create_site_crt(self, path, validity_period):
         command_generate_crt = 'openssl x509 -req -in {path_csr} -CA {path_root_crt} -CAkey {path_root_key}' \
-                               ' -CAcreateserial -out {path_crt} -days {validity_period}'.format(
+                               ' -CAcreateserial -out {path_crt} -days {validity_period} -extfile {path_ext}'.format(
             path_csr=path + '.csr', path_root_crt=path_root_crt, path_root_key=path_root_key, path_crt=path + '.crt',
-            validity_period=validity_period)
+            validity_period=validity_period, path_ext=path + '.ext')
 
         subprocess.call(command_generate_crt, shell=True)
 
@@ -321,10 +334,19 @@ class CAOPEN:
         return root_crt
 
     def create_model_site_crt(self, cn, validity_period):
-        site_crt = models.SiteCrt.objects.update_or_create(
+        site_crt = models.SiteCrt.objects.create(
             key=os.path.join(cn, cn + '.key'),
             crt=os.path.join(cn, cn + '.crt'),
             cn=cn,
+            date_end=timezone.now() + datetime.timedelta(days=validity_period),
+        )
+        return site_crt
+
+    def recreation_site_crt(self, cn, pk, validity_period):
+        site_crt = models.SiteCrt.objects.filter(pk=pk).update(
+            key=os.path.join(cn, cn + '.key'),
+            crt=os.path.join(cn, cn + '.crt'),
+            date_start=timezone.now(),
             date_end=timezone.now() + datetime.timedelta(days=validity_period)
         )
         return site_crt
