@@ -14,7 +14,7 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView, ListView, RedirectView
 from django.views.generic.edit import FormMixin, ContextMixin
 
-from core.utils import CAOPEN, CA
+from core.utils import Ca
 from core import forms
 from core import models
 
@@ -120,7 +120,7 @@ class GenerateRootCrt(BreadcrumbsMixin, CertRootExistMixin, FormView):
         )
 
     def form_valid(self, form):
-        ca = CAOPEN()
+        ca = Ca()
         ca.generate_root_crt(form.cleaned_data)
         return super(GenerateRootCrt, self).form_valid(form)
 
@@ -166,7 +166,7 @@ class CreateSiteCrt(BreadcrumbsMixin, FormView):
 
     def form_valid(self, form):
         ValidIpAddressRegex = r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
-        ca = CAOPEN()
+        ca = Ca()
         if re.findall(ValidIpAddressRegex, form.cleaned_data['cn']):
             ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'], alt_name='IP')
         else:
@@ -200,7 +200,7 @@ class LoadSiteCrt(BreadcrumbsMixin, FormView):
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, form.cleaned_data['crt_text'])
             cn = cert.get_subject().CN
             pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, form.cleaned_data['key_text'])
-            CA.write_cert_site(cert, pkey, cn)
+            Ca.write_cert_site(cert, pkey, cn)
             models.SiteCrt.objects.create(
                 key=os.path.join(cn, cn + '.key'),
                 crt=os.path.join(cn, cn + '.crt'),
@@ -288,7 +288,7 @@ class RecreationSiteCrt(BreadcrumbsMixin, FormView, DetailView):
         directory = os.listdir(path_root_dir)
         for file in directory:
             os.remove(os.path.join(path_root_dir, file))
-        ca = CAOPEN()
+        ca = Ca()
         ca.generate_site_crt(self.object.cn, form.cleaned_data['validity_period'], self.kwargs['pk'])
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)
@@ -316,7 +316,7 @@ class RecreationRootCrt(BreadcrumbsMixin, FormView, DetailView):
         directory = os.listdir(path_root_dir)
         for file in directory:
             os.remove(os.path.join(path_root_dir, file))
-        ca = CAOPEN()
+        ca = Ca()
         ca.generate_root_crt(form.cleaned_data, recreation=True)
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)
