@@ -1,6 +1,5 @@
 import shutil
 import os
-import re
 from datetime import datetime, timedelta
 from OpenSSL import crypto
 from djutils.views.generic import SortMixin
@@ -165,9 +164,8 @@ class CreateSiteCrt(BreadcrumbsMixin, FormView):
         return {'validity_period': timezone.now() + timedelta(days=settings.VALIDITY_PERIOD_CRT)}
 
     def form_valid(self, form):
-        ValidIpAddressRegex = r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
         ca = Ca()
-        if re.findall(ValidIpAddressRegex, form.cleaned_data['cn']):
+        if ca.get_type_alt_names(form.cleaned_data['cn']):
             ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'], alt_name='IP')
         else:
             ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'])
