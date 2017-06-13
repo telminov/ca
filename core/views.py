@@ -131,7 +131,7 @@ class Index(RedirectView):
 class CertificatesSearch(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
     form_class = forms.CertificatesSearch
     model = models.SiteCrt
-    template_name = 'core/certificates.html.html'
+    template_name = 'core/certificates.html'
     sort_params = ['cn', 'date_start', 'date_end']
 
     def get_form_kwargs(self):

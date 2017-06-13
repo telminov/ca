@@ -32,7 +32,7 @@ class RootCrtExists(TestCase):
         self.assertTemplateUsed(response, 'core/root_certificate_managing/already_exists.html')
 
 
-class RootCrtView(TestCase):
+class ChoiceRootCrtView(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(
@@ -51,7 +51,7 @@ class RootCrtView(TestCase):
         response = self.client.get(reverse('root_crt'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/root_certificate_managing/certificates.html')
+        self.assertTemplateUsed(response, 'core/root_certificate_managing/crt_choice.html')
 
     def test_root_crt_exists(self):
         factories.RootCrt.create()
@@ -155,7 +155,7 @@ class RootCrtView(TestCase):
 
         response = self.client.get(reverse('root_crt_view'))
 
-        self.assertRedirects(response, reverse('root_crt'))
+        self.assertEqual(response.status_code, 404)
 
 
 class RootCrtDeleteView(TestCase):
@@ -187,7 +187,7 @@ class RootCrtDeleteView(TestCase):
 
         response = self.client.get(reverse('root_crt_delete'))
 
-        self.assertRedirects(response, reverse('root_crt'))
+        self.assertEqual(response.status_code, 404)
 
     # в первом приближении
     def test_delete(self):
@@ -393,7 +393,6 @@ class CertificatesUploadExistingView(TestCase):
         response = self.client.post(reverse('certificates_upload_existing'), {'crt_text': factories.site_crt_all_fields.decode(),
                                                                  'key_text': factories.site_key_all_fields.decode()})
 
-        self.assertRedirects(response, reverse('certificate_search'))
         self.assertEqual(models.SiteCrt.objects.all().count(), 1)
 
 
