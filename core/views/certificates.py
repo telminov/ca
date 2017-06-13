@@ -1,11 +1,37 @@
-from .Base import *
+import shutil
+import os
+from datetime import datetime, timedelta
+from OpenSSL import crypto
+from djutils.views.generic import SortMixin
+
+from django.utils import timezone
+from django.conf import settings
+from django.contrib import messages
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy, reverse
+from django.views.generic import FormView, DetailView, DeleteView, ListView, RedirectView
+from django.views.generic.edit import FormMixin, ContextMixin
+
+from core.utils import Ca
+from core import forms
+from core import models
+
+
+class BreadcrumbsMixin(ContextMixin):
+    def get_breadcrumbs(self):
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['breadcrumbs'] = self.get_breadcrumbs()
+        return context
 
 
 class Index(RedirectView):
     url = reverse_lazy('certificates_search')
 
 
-class CertificatesSearch(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
+class Search(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
     form_class = forms.CertificatesSearch
     model = models.SiteCrt
     template_name = 'core/certificates.html'
@@ -26,7 +52,7 @@ class CertificatesSearch(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
         return queryset
 
 
-class CertificatesCreate(BreadcrumbsMixin, FormView):
+class Create(BreadcrumbsMixin, FormView):
     form_class = forms.CertificatesCreate
     success_url = reverse_lazy('certificates_search')
     template_name = 'core/certificate/create.html'
@@ -49,7 +75,7 @@ class CertificatesCreate(BreadcrumbsMixin, FormView):
         return super().form_valid(form)
 
 
-class CertificatesUploadExisting(BreadcrumbsMixin, FormView):
+class UploadExisting(BreadcrumbsMixin, FormView):
     template_name = 'core/certificate/upload_existing.html'
     form_class = forms.CertificatesUploadExisting
     success_url = reverse_lazy('certificates_search')
@@ -85,7 +111,7 @@ class CertificatesUploadExisting(BreadcrumbsMixin, FormView):
         return super().form_valid(form)
 
 
-class CertificatesView(BreadcrumbsMixin, FormMixin, DetailView):
+class View(BreadcrumbsMixin, FormMixin, DetailView):
     template_name = 'core/certificate/view.html'
     form_class = forms.ViewCrtText
     model = models.SiteCrt
@@ -114,7 +140,7 @@ class CertificatesView(BreadcrumbsMixin, FormMixin, DetailView):
         return super().get_context_data(**kwargs)
 
 
-class CertificatesDelete(BreadcrumbsMixin, DeleteView):
+class Delete(BreadcrumbsMixin, DeleteView):
     model = models.SiteCrt
     template_name = 'core/certificate/delete.html'
     success_url = reverse_lazy('certificates_search')
@@ -135,7 +161,7 @@ class CertificatesDelete(BreadcrumbsMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class CertificatesRecreate(BreadcrumbsMixin, FormView, DetailView):
+class Recreate(BreadcrumbsMixin, FormView, DetailView):
     model = models.SiteCrt
     form_class = forms.RecreationCrt
     template_name = 'core/certificate/recreate.html'

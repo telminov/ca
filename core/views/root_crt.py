@@ -1,22 +1,46 @@
-from .Base import *
+import os
+from datetime import datetime
+from OpenSSL import crypto
+
+from django.conf import settings
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy, reverse
+from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView
+from django.views.generic.edit import FormMixin, ContextMixin
+
+from core.utils import Ca
+from core import forms
+from core import models
 
 
-class RootCrtExists(TemplateView):
+class BreadcrumbsMixin(ContextMixin):
+    def get_breadcrumbs(self):
+        return None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['breadcrumbs'] = self.get_breadcrumbs()
+        return context
+
+
+class Exists(TemplateView):
     template_name = 'core/root_certificate_managing/already_exists.html'
 
 
-class RootCrtExistsMixin:
+class ExistsMixin:
     def get(self, request, *args, **kwargs):
         if models.RootCrt.objects.exists():
             return HttpResponseRedirect(reverse_lazy('root_crt_exists'))
         return super().get(request, *args, **kwargs)
 
 
-class RootCrt(RootCrtExistsMixin, TemplateView):
+class CrtChoice(ExistsMixin, TemplateView):
     template_name = 'core/root_certificate_managing/crt_choice.html'
 
 
-class RootCrtUploadExisting(BreadcrumbsMixin, RootCrtExistsMixin, CreateView):
+class UploadExisting(BreadcrumbsMixin, ExistsMixin, CreateView):
     form_class = forms.RootCrt
     template_name = 'core/root_certificate_managing/upload_existing.html'
     success_url = reverse_lazy('root_crt_view')
@@ -28,7 +52,7 @@ class RootCrtUploadExisting(BreadcrumbsMixin, RootCrtExistsMixin, CreateView):
         )
 
 
-class RootCrtView(BreadcrumbsMixin, FormMixin, DetailView):
+class View(BreadcrumbsMixin, FormMixin, DetailView):
     model = models.RootCrt
     form_class = forms.ViewCrtText
     template_name = 'core/root_certificate_managing/view.html'
@@ -57,7 +81,7 @@ class RootCrtView(BreadcrumbsMixin, FormMixin, DetailView):
         return super().get_context_data(**kwargs)
 
 
-class RootCrtDelete(BreadcrumbsMixin, DeleteView):
+class Delete(BreadcrumbsMixin, DeleteView):
     model = models.RootCrt
     template_name = 'core/root_certificate_managing/delete.html'
     success_url = reverse_lazy('root_crt')
@@ -80,7 +104,7 @@ class RootCrtDelete(BreadcrumbsMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class RootCrtGenerateNew(BreadcrumbsMixin, RootCrtExistsMixin, FormView):
+class GenerateNew(BreadcrumbsMixin, ExistsMixin, FormView):
     form_class = forms.ConfigRootCrt
     template_name = 'core/root_certificate_managing/generate_new.html'
     success_url = reverse_lazy('root_crt_view')
@@ -94,10 +118,10 @@ class RootCrtGenerateNew(BreadcrumbsMixin, RootCrtExistsMixin, FormView):
     def form_valid(self, form):
         ca = Ca()
         ca.generate_root_crt(form.cleaned_data)
-        return super(RootCrtGenerateNew, self).form_valid(form)
+        return super(GenerateNew, self).form_valid(form)
 
 
-class RootCrtRecreate(BreadcrumbsMixin, FormView, DetailView):
+class Recreate(BreadcrumbsMixin, FormView, DetailView):
     model = models.RootCrt
     form_class = forms.RecreationCrt
     template_name = 'core/certificate/recreate.html'
