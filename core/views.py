@@ -2,6 +2,7 @@ import shutil
 import os
 from datetime import datetime, timedelta
 from OpenSSL import crypto
+from djutils.views.generic import SortMixin
 
 from django.utils import timezone
 from django.conf import settings
@@ -12,7 +13,7 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView, ListView, RedirectView
 from django.views.generic.edit import FormMixin, ContextMixin
 
-from core.utils import CA
+from core.utils import Ca
 from core import forms
 from core import models
 
@@ -118,8 +119,8 @@ class RootCrtGenerateNew(BreadcrumbsMixin, CertRootExistMixin, FormView):
         )
 
     def form_valid(self, form):
-        ca = CA()
-        ca.generate_root_certificate(form.cleaned_data)
+        ca = Ca()
+        ca.generate_root_crt(form.cleaned_data)
         return super(RootCrtGenerateNew, self).form_valid(form)
 
 
@@ -127,11 +128,11 @@ class Index(RedirectView):
     url = reverse_lazy('certificates_search')
 
 
-class CertificatesSearch(BreadcrumbsMixin, FormMixin, ListView):
+class CertificatesSearch(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
     form_class = forms.CertificatesSearch
     model = models.SiteCrt
-    template_name = 'core/certificates.html'
-    data_method = None
+    template_name = 'core/certificates.html.html'
+    sort_params = ['cn', 'date_start', 'date_end']
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -139,7 +140,7 @@ class CertificatesSearch(BreadcrumbsMixin, FormMixin, ListView):
         return kwargs
 
     def get_queryset(self):
-        queryset = super().get_queryset().order_by('-id')
+        queryset = super().get_queryset()
         form = self.form_class(self.request.GET)
         if form.is_valid():
             cn = form.cleaned_data['cn']
@@ -163,8 +164,11 @@ class CertificatesCreate(BreadcrumbsMixin, FormView):
         return {'validity_period': timezone.now() + timedelta(days=settings.VALIDITY_PERIOD_CRT)}
 
     def form_valid(self, form):
-        ca = CA()
-        ca.generate_site_certificate(form.cleaned_data['cn'], form.cleaned_data['validity_period'])
+        ca = Ca()
+        if ca.get_type_alt_names(form.cleaned_data['cn']):
+            ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'], alt_name='IP')
+        else:
+            ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'])
         return super().form_valid(form)
 
 
@@ -194,7 +198,7 @@ class CertificatesUploadExisting(BreadcrumbsMixin, FormView):
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, form.cleaned_data['crt_text'])
             cn = cert.get_subject().CN
             pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, form.cleaned_data['key_text'])
-            CA.write_cert_site(cert, pkey, cn)
+            Ca.write_cert_site(cert, pkey, cn)
             models.SiteCrt.objects.create(
                 key=os.path.join(cn, cn + '.key'),
                 crt=os.path.join(cn, cn + '.crt'),
@@ -282,8 +286,8 @@ class CertificatesRecreate(BreadcrumbsMixin, FormView, DetailView):
         directory = os.listdir(path_root_dir)
         for file in directory:
             os.remove(os.path.join(path_root_dir, file))
-        ca = CA()
-        ca.generate_site_certificate(self.object.cn, form.cleaned_data['validity_period'], pk=self.object.pk)
+        ca = Ca()
+        ca.generate_site_crt(self.object.cn, form.cleaned_data['validity_period'], self.kwargs['pk'])
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)
 
@@ -310,7 +314,7 @@ class RootCrtRecreate(BreadcrumbsMixin, FormView, DetailView):
         directory = os.listdir(path_root_dir)
         for file in directory:
             os.remove(os.path.join(path_root_dir, file))
-        ca = CA()
-        ca.generate_root_certificate(form.cleaned_data, recreation=True)
+        ca = Ca()
+        ca.generate_root_crt(form.cleaned_data, recreation=True)
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)

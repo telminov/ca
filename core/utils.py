@@ -1,5 +1,7 @@
 import datetime
 import os
+import subprocess
+import re
 from OpenSSL import crypto
 
 from django.utils import timezone
@@ -9,34 +11,91 @@ from core import models
 
 CA_KEY_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.key')
 CA_CERT_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.crt')
+PATH_ROOT_KEY = os.path.relpath(os.path.join(settings.MEDIA_ROOT, CA_KEY_FILE))
+PATH_ROOT_CRT = os.path.relpath(os.path.join(settings.MEDIA_ROOT, CA_CERT_FILE))
 
 
-class CA:
-    def generate_root_certificate(self, data, recreation=False):
-        pkey = self.create_key_pair()
+class CaError(Exception):
+    """Error create certificate"""
+
+
+class Ca:
+    def generate_root_crt(self, data, recreation=False):
+        if not os.path.exists(settings.MEDIA_ROOT):
+            os.mkdir(settings.MEDIA_ROOT)
+        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)):
+            os.mkdir(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH))
+
+        self._create_pkey(PATH_ROOT_KEY)
         validity_period = self.calculate_validity_period(data['validity_period'])
         if recreation:
-            cert = self.create_cert_root(pkey, self.generate_subj_root_crt_recreate(), validity_period)
+            self._create_root_crt(self.generate_subj_recreation_root_crt(), validity_period)
         else:
-            cert = self.create_cert_root(pkey, self.generate_subj_root_crt(data), validity_period)
-        self.write_cert_root(cert, pkey)
-        if not recreation:
-            self.create_model_root_crt(data)
+            self._create_root_crt(self.generate_subj_root_crt(data), validity_period)
+            self._create_model_root_crt(data)
 
-    def generate_site_certificate(self, cn, validity_period, pk=None):
-        pkey = self.create_key_pair()
-        validity_period = self.calculate_validity_period(validity_period)
-        cert = self.create_cert_site(pkey, self.generate_subj_site_crt(cn), validity_period)
-        self.write_cert_site(cert, pkey, cn)
-        if not pk:
-            self.create_model_site_crt(cn, validity_period)
+    def generate_site_crt(self, cn, validity_period, pk=None, alt_name='DNS'):
+        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
+            os.mkdir(os.path.join(settings.MEDIA_ROOT, cn))
+
+        path = os.path.relpath(settings.MEDIA_ROOT + '/' + cn + '/' + cn)
+        self._create_pkey(path + '.key')
+        self._create_config_crt(self.generate_subj_site_crt(cn))
+        self._create_extfile_crt(cn, alt_name)
+        self._create_req_crt(path)
+        self._create_site_crt(path, self.calculate_validity_period(validity_period))
+        if pk:
+            self._recreation_model_site_crt(cn, pk, self.calculate_validity_period(validity_period))
         else:
-            self.recreation_site_crt(cn, pk, validity_period)
+            self._create_model_site_crt(cn, self.calculate_validity_period(validity_period))
 
-    def calculate_validity_period(self, date):
+    @staticmethod
+    def get_type_alt_names(cn):
+        ip_regexp = r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+        return re.search(ip_regexp, cn)
+
+    @staticmethod
+    def calculate_validity_period(date):
         now = datetime.datetime.now()
         validity_period = datetime.datetime.combine(date, now.time()) - now
-        return int(validity_period.total_seconds())
+        return validity_period.days
+
+    @staticmethod
+    def write_cert_site(cert, key, cn):
+        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
+            os.mkdir(os.path.join(settings.MEDIA_ROOT, cn))
+
+        with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.crt'), 'wb') as f:
+            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+
+        with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.key'), 'wb') as f:
+            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key))
+
+    @staticmethod
+    def generate_subj_root_crt(data):
+        options = {
+            'C': data['country'],
+            'ST': data['state'],
+            'L': data['location'],
+            'O': data['organization'],
+            'OU': data['organizational_unit_name'],
+            'CN': data['common_name'],
+            'emailAddress': data['email'],
+        }
+        return options
+
+    @staticmethod
+    def generate_subj_recreation_root_crt():
+        root = models.RootCrt.objects.get()
+        options = {
+            'C': root.country,
+            'ST': root.state,
+            'L': root.location,
+            'O': root.organization,
+            'OU': root.organizational_unit_name,
+            'emailAddress': root.email,
+        }
+        return options
 
     @staticmethod
     def generate_subj_site_crt(cn):
@@ -52,112 +111,69 @@ class CA:
         }
         return options
 
-    def generate_subj_root_crt_recreate(self):
-        root = models.RootCrt.objects.get()
-        options = {
-            'C': root.country,
-            'ST': root.state,
-            'L': root.location,
-            'O': root.organization,
-            'OU': root.organizational_unit_name,
-            'emailAddress': root.email,
-        }
-        return options
+    def _create_pkey(self, path):
+        command_generate_key = 'openssl genrsa -out {path} 2048'.format(path=path)
+        p = subprocess.run(command_generate_key, shell=True, stderr=subprocess.PIPE, universal_newlines=True)
 
-    def generate_subj_root_crt(self, data):
-        options = {
-            'C': data['country'],
-            'ST': data['state'],
-            'L': data['location'],
-            'O': data['organization'],
-            'OU': data['organizational_unit_name'],
-            'CN': data['common_name'],
-            'emailAddress': data['email'],
-        }
-        return options
+        if p.returncode:
+            raise CaError('Command:\n' + p.args + '\n' + 'Output:\n' + p.stderr)
 
-    @staticmethod
-    def create_key_pair():
-        pkey = crypto.PKey()
-        pkey.generate_key(crypto.TYPE_RSA, 2048)
-        return pkey
+    def _create_root_crt(self, data, validity_period):
+        command_generate_root_crt = 'openssl req -x509 -new -key {path_key} -days {validity_period} -out {path_crt}'.format(
+            path_key=PATH_ROOT_KEY, path_crt=PATH_ROOT_CRT, validity_period=validity_period)
 
-    @staticmethod
-    def create_cert_site(pkey, data, validity_period):
-        root_crt = models.RootCrt.objects.get()
-        with open(os.path.join(settings.MEDIA_ROOT, str(root_crt.crt))) as f:
-            ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, f.read())
-
-        with open(os.path.join(settings.MEDIA_ROOT, str(root_crt.key))) as f:
-            ca_key = crypto.load_privatekey(crypto.FILETYPE_PEM, f.read())
-
-        req = crypto.X509Req()
-        subj = req.get_subject()
-
+        command_subj_root_crt = ' -subj "'
         for key, value in data.items():
-            if value not in ['', None]:
-                if key != 'validity_period':
-                    setattr(subj, key, value)
+            if value not in ['', None] and key != 'validity_period':
+                command_subj_root_crt += '/{key}={value}'.format(key=key, value=value)
+        command_subj_root_crt += '"'
 
-        req.set_pubkey(pkey)
-        req.sign(ca_key, 'sha256')
+        p = subprocess.run(command_generate_root_crt + command_subj_root_crt, shell=True, stderr=subprocess.PIPE,
+                                   universal_newlines=True)
+        if p.returncode:
+            raise CaError('Command:\n' + p.args + '\n' + 'Output:\n' + p.stderr)
 
-        cert = crypto.X509()
-        cert.gmtime_adj_notBefore(0)
-        cert.gmtime_adj_notAfter(validity_period)
-        cert.set_issuer(ca_cert.get_subject())
-        cert.set_subject(req.get_subject())
-        cert.set_pubkey(req.get_pubkey())
-        cert.sign(ca_key, 'sha256')
-        return cert
+    def _create_extfile_crt(self, cn, alt_name):
+        ext = ['authorityKeyIdentifier=keyid,issuer\n', 'basicConstraints=CA:FALSE\n',
+               'keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment\n',
+               'subjectAltName = @alt_names\n', '\n', '[alt_names]\n', '{alt_name}.1 = {cn}\n'.format(alt_name=alt_name,
+                                                                                                      cn=cn)]
+        with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.ext'), 'wb') as f:
+            for x in ext:
+                f.write(x.encode())
 
-    @staticmethod
-    def create_cert_root(pkey, date, validity_period):
-        cert = crypto.X509()
-        subj = cert.get_subject()
+    def _create_config_crt(self, data):
+        config = ['[req]\n', 'default_bits = 2048\n', 'prompt = no\n', 'default_md = sha256\n',
+                  'distinguished_name = dn\n', '\n', '[dn]\n']
+        for key, value in data.items():
+            if value not in ['', None] and key != 'validity_period':
+                config.append('{key}={value}\n'.format(key=key, value=value))
 
-        for key, value in date.items():
-            if value != '':
-                if key != 'validity_period':
-                    setattr(subj, key, value)
+        with open(os.path.join(settings.MEDIA_ROOT, data['CN'], data['CN'] + '.cnf'), 'wb') as f:
+            for x in config:
+                f.write(x.encode())
 
-        cert.gmtime_adj_notBefore(0)
-        cert.gmtime_adj_notAfter(validity_period)
-        cert.set_issuer(cert.get_subject())
-        cert.set_pubkey(pkey)
-        cert.sign(pkey, 'sha256')
-        return cert
+    def _create_req_crt(self, path):
+        command_generate_req = '/bin/bash -c "openssl req -new -key {path_key} -out {path_csr} -config <( cat {path_config} )"'.format(
+            path_key=path + '.key', path_csr=path + '.csr', path_config=path + '.cnf')
 
-    @staticmethod
-    def write_cert_root(cert, key):
-        key_path = os.path.join(settings.MEDIA_ROOT, CA_KEY_FILE)
-        cert_path = os.path.join(settings.MEDIA_ROOT, CA_CERT_FILE)
+        p = subprocess.run(command_generate_req, shell=True, stderr=subprocess.PIPE, universal_newlines=True)
 
-        if not os.path.exists(settings.MEDIA_ROOT):
-            os.mkdir(settings.MEDIA_ROOT)
+        if p.returncode:
+            raise CaError('Command:\n' + p.args + '\n' + 'Output:\n' + p.stderr)
 
-        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)):
-            os.mkdir(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH))
+    def _create_site_crt(self, path, validity_period):
+        command_generate_crt = 'openssl x509 -req -in {path_csr} -CA {path_root_crt} -CAkey {path_root_key}' \
+                               ' -CAcreateserial -out {path_crt} -days {validity_period} -extfile {path_ext}'.format(
+            path_csr=path + '.csr', path_root_crt=PATH_ROOT_CRT, path_root_key=PATH_ROOT_KEY, path_crt=path + '.crt',
+            validity_period=validity_period, path_ext=path + '.ext')
 
-        with open(cert_path, 'wb') as f:
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+        p = subprocess.run(command_generate_crt, shell=True, stderr=subprocess.PIPE, universal_newlines=True)
 
-        with open(key_path, 'wb') as f:
-            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key))
+        if p.returncode:
+            raise CaError('Command:\n' + p.args + '\n' + 'Output:\n' + p.stderr)
 
-    @staticmethod
-    def write_cert_site(cert, key, cn):
-        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
-            os.mkdir(os.path.join(settings.MEDIA_ROOT, cn))
-
-        with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.crt'), 'wb') as f:
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-
-        with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.key'), 'wb') as f:
-            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key))
-
-    @staticmethod
-    def create_model_root_crt(data):
+    def _create_model_root_crt(self, data):
         root_crt = models.RootCrt.objects.create(
             key=CA_KEY_FILE,
             crt=CA_CERT_FILE,
@@ -170,22 +186,20 @@ class CA:
         )
         return root_crt
 
-    @staticmethod
-    def create_model_site_crt(cn, validity_period):
+    def _create_model_site_crt(self, cn, validity_period):
         site_crt = models.SiteCrt.objects.create(
             key=os.path.join(cn, cn + '.key'),
             crt=os.path.join(cn, cn + '.crt'),
             cn=cn,
-            date_end=timezone.now() + datetime.timedelta(seconds=validity_period)
+            date_end=timezone.now() + datetime.timedelta(days=validity_period),
         )
         return site_crt
 
-    @staticmethod
-    def recreation_site_crt(cn, pk, validity_period):
+    def _recreation_model_site_crt(self, cn, pk, validity_period):
         site_crt = models.SiteCrt.objects.filter(pk=pk).update(
             key=os.path.join(cn, cn + '.key'),
             crt=os.path.join(cn, cn + '.crt'),
             date_start=timezone.now(),
-            date_end=timezone.now() + datetime.timedelta(seconds=validity_period)
+            date_end=timezone.now() + datetime.timedelta(days=validity_period)
         )
         return site_crt
