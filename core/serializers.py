@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from core import models
-from core.utils import CA
+from core.utils import Ca
 
 
 class SiteCrtCreate(serializers.ModelSerializer):
@@ -12,8 +12,11 @@ class SiteCrtCreate(serializers.ModelSerializer):
         fields = ['cn', 'validity_period']
 
     def save(self):
-        ca = CA()
-        ca.generate_site_certificate(self.validated_data['cn'], self.validated_data['validity_period'])
+        ca = Ca()
+        if ca.get_type_alt_names(self.validated_data['cn']):
+            ca.generate_site_crt(self.validated_data['cn'], self.validated_data['validity_period'], alt_name='IP')
+        else:
+            ca.generate_site_crt(self.validated_data['cn'], self.validated_data['validity_period'])
 
 
 class SiteCrt(serializers.ModelSerializer):
