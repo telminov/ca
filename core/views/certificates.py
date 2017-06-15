@@ -171,7 +171,7 @@ class Recreate(BreadcrumbsMixin, FormView, DetailView):
             ('Home', reverse('index')),
             ('View %s' % models.SiteCrt.objects.get(pk=self.kwargs['pk']).cn,
              reverse('certificates_view', kwargs={'pk': self.kwargs['pk']})),
-            ('Recreation certificate', '')
+            ('Recreate certificate', '')
         )
 
     def get_success_url(self):

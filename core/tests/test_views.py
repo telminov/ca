@@ -555,7 +555,7 @@ class CertificatesRecreateView(TestCase):
         self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index')))
         self.assertEqual(response.context['breadcrumbs'][1], ('View %s' % models.SiteCrt.objects.get().cn,
                          reverse('certificates_view', kwargs={'pk': '1'})))
-        self.assertEqual(response.context['breadcrumbs'][2], ('Recreation certificate', ''))
+        self.assertEqual(response.context['breadcrumbs'][2], ('Recreate certificate', ''))
 
     # в первом приближении
     def test_recreation(self):
