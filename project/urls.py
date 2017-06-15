@@ -13,6 +13,7 @@ urlpatterns = [
         name='login'),
     url(r'^logout/', logout_then_login, {'login_url': '/login/?next=/'}, name='logout'),
     url(r'^api-token-auth/$', views.obtain_auth_token),
+    url(r'^tz_detect/', include('tz_detect.urls')),
     url(r'^', include('core.urls')),
 ]
 
