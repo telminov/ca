@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'bootstrap3',
     'rest_framework',
     'rest_framework.authtoken',
+    'tz_detect',
 
     'djutils',
 
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'djutils.middleware.LoginRequired',
+    'tz_detect.middleware.TimezoneMiddleware',
     'core.middleware.RootCrtMiddleware',
 ]
 
