@@ -18,8 +18,8 @@
                     </form>
                 </div>
                 <div class="col-xs-6 pull-right">
-                    <a href="{% url 'create_crt' %}" class="btn btn-primary pull-right new-crt-btn">New .crt</a>
-                    <a href="{% url 'upload_existing' %}" class="btn btn-default pull-right">Upload
+                    <a href="{% url 'certificates_create' %}" class="btn btn-primary pull-right new-crt-btn">New .crt</a>
+                    <a href="{% url 'certificates_upload_existing' %}" class="btn btn-default pull-right">Upload
                         existing</a>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                 {% for object in object_list %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td><a href="{% url 'view_crt' pk=object.pk %}">{{ object.cn }}</a></td>
+                        <td><a href="{% url 'certificates_view' pk=object.pk %}">{{ object.cn }}</a></td>
                         <td class="cn-table-date">{{ object.date_start }}</td>
                         <td class="cn-table-date">{{ object.date_end }}</td>
                         <td><a class="btn btn-default" href="{{ object.crt.url }}">crt</a> <a class="btn btn-default"

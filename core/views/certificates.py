@@ -7,22 +7,14 @@ from djutils.views.generic import SortMixin
 from django.utils import timezone
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
-from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView, ListView, RedirectView
+from django.views.generic import FormView, DetailView, DeleteView, ListView, RedirectView
 from django.views.generic.edit import FormMixin, ContextMixin
 
 from core.utils import Ca
 from core import forms
 from core import models
-
-
-class CertRootExistMixin:
-    def get(self, request, *args, **kwargs):
-        if models.RootCrt.objects.exists():
-            return HttpResponseRedirect(reverse_lazy('root_crt_exists'))
-        return super().get(request, *args, **kwargs)
 
 
 class BreadcrumbsMixin(ContextMixin):
@@ -35,103 +27,14 @@ class BreadcrumbsMixin(ContextMixin):
         return context
 
 
-class CrtExist(TemplateView):
-    template_name = 'core/root_certificate_managing/root_already_exists.html'
-
-
-class IndexRootCrt(CertRootExistMixin, TemplateView):
-    template_name = 'core/root_certificate_managing/index.html'
-
-
-class LoadRootCrt(BreadcrumbsMixin, CertRootExistMixin, CreateView):
-    form_class = forms.RootCrt
-    template_name = 'core/root_certificate_managing/has_root_key.html'
-    success_url = reverse_lazy('view_root_crt')
-
-    def get_breadcrumbs(self):
-        return (
-            ('Home', reverse('index_root')),
-            ('Load root certificate', '')
-        )
-
-
-class ViewRootCrt(BreadcrumbsMixin, FormMixin, DetailView):
-    model = models.RootCrt
-    form_class = forms.ViewCrtText
-    template_name = 'core/root_certificate_managing/view_root_files.html'
-
-    def get_breadcrumbs(self):
-        return (
-            ('Home', reverse('index')),
-            ('View root certificate', '')
-        )
-
-    def get_initial(self):
-        crt = models.RootCrt.objects.get()
-        crt_data = crt.crt.read().decode()
-        key_data = crt.key.read().decode()
-        return {'crt': crt_data, 'key': key_data}
-
-    def get_object(self, queryset=None):
-        return get_object_or_404(self.model)
-
-    def get_context_data(self, **kwargs):
-        with open(self.object.crt.path, 'rt') as cert:
-            cert_data = cert.read().encode()
-            cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
-            kwargs['cert'] = cert.get_subject()
-            kwargs['crt_validity_period'] = datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ')
-        return super().get_context_data(**kwargs)
-
-
-class RootCrtDelete(BreadcrumbsMixin, DeleteView):
-    model = models.RootCrt
-    template_name = 'core/root_certificate_managing/delete.html'
-    success_url = reverse_lazy('index_root')
-
-    def get_breadcrumbs(self):
-        return (
-            ('Home', reverse('index')),
-            ('View certificate', reverse('view_root_crt')),
-            ('Delete root certificate', '')
-        )
-
-    def get_object(self, queryset=None):
-        return get_object_or_404(self.model)
-
-    def delete(self, request, *args, **kwargs):
-        path_root_dir = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)
-        directory = os.listdir(path_root_dir)
-        for file in directory:
-            os.remove(os.path.join(path_root_dir, file))
-        return super().delete(request, *args, **kwargs)
-
-
-class GenerateRootCrt(BreadcrumbsMixin, CertRootExistMixin, FormView):
-    form_class = forms.ConfigRootCrt
-    template_name = 'core/root_certificate_managing/no_root_key.html'
-    success_url = reverse_lazy('view_root_crt')
-
-    def get_breadcrumbs(self):
-        return (
-            ('Home', reverse('index_root')),
-            ('Generate root certificate', '')
-        )
-
-    def form_valid(self, form):
-        ca = Ca()
-        ca.generate_root_crt(form.cleaned_data)
-        return super(GenerateRootCrt, self).form_valid(form)
-
-
 class Index(RedirectView):
-    url = reverse_lazy('certificate_search')
+    url = reverse_lazy('certificates_search')
 
 
-class SearchSiteCrt(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
-    form_class = forms.SearchSiteCrt
+class Search(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
+    form_class = forms.CertificatesSearch
     model = models.SiteCrt
-    template_name = 'core/index.html'
+    template_name = 'core/search/certificates.html'
     sort_params = ['cn', 'date_start', 'date_end']
 
     def get_form_kwargs(self):
@@ -149,9 +52,9 @@ class SearchSiteCrt(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
         return queryset
 
 
-class CreateSiteCrt(BreadcrumbsMixin, FormView):
-    form_class = forms.CreateSiteCrt
-    success_url = reverse_lazy('certificate_search')
+class Create(BreadcrumbsMixin, FormView):
+    form_class = forms.CertificatesCreate
+    success_url = reverse_lazy('certificates_search')
     template_name = 'core/certificate/create.html'
 
     def get_breadcrumbs(self):
@@ -172,10 +75,10 @@ class CreateSiteCrt(BreadcrumbsMixin, FormView):
         return super().form_valid(form)
 
 
-class LoadSiteCrt(BreadcrumbsMixin, FormView):
+class UploadExisting(BreadcrumbsMixin, FormView):
     template_name = 'core/certificate/upload_existing.html'
-    form_class = forms.LoadSiteCrt
-    success_url = reverse_lazy('certificate_search')
+    form_class = forms.CertificatesUploadExisting
+    success_url = reverse_lazy('certificates_search')
 
     def get_breadcrumbs(self):
         return (
@@ -208,7 +111,7 @@ class LoadSiteCrt(BreadcrumbsMixin, FormView):
         return super().form_valid(form)
 
 
-class ViewSiteCrt(BreadcrumbsMixin, FormMixin, DetailView):
+class View(BreadcrumbsMixin, FormMixin, DetailView):
     template_name = 'core/certificate/view.html'
     form_class = forms.ViewCrtText
     model = models.SiteCrt
@@ -237,15 +140,15 @@ class ViewSiteCrt(BreadcrumbsMixin, FormMixin, DetailView):
         return super().get_context_data(**kwargs)
 
 
-class SiteCrtDelete(BreadcrumbsMixin, DeleteView):
+class Delete(BreadcrumbsMixin, DeleteView):
     model = models.SiteCrt
     template_name = 'core/certificate/delete.html'
-    success_url = reverse_lazy('certificate_search')
+    success_url = reverse_lazy('certificates_search')
 
     def get_breadcrumbs(self):
         return (
             ('Home', reverse('index')),
-            ('View %s' % self.get_object().cn, reverse('view_crt', kwargs={'pk': self.kwargs['pk']})),
+            ('View %s' % self.get_object().cn, reverse('certificates_view', kwargs={'pk': self.kwargs['pk']})),
             ('Delete %s' % self.get_object().cn, '')
         )
 
@@ -258,21 +161,21 @@ class SiteCrtDelete(BreadcrumbsMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class RecreationSiteCrt(BreadcrumbsMixin, FormView, DetailView):
+class Recreate(BreadcrumbsMixin, FormView, DetailView):
     model = models.SiteCrt
     form_class = forms.RecreationCrt
-    template_name = 'core/certificate/recreation.html'
+    template_name = 'core/certificate/recreate.html'
 
     def get_breadcrumbs(self):
         return (
             ('Home', reverse('index')),
             ('View %s' % models.SiteCrt.objects.get(pk=self.kwargs['pk']).cn,
-             reverse('view_crt', kwargs={'pk': self.kwargs['pk']})),
+             reverse('certificates_view', kwargs={'pk': self.kwargs['pk']})),
             ('Recreation certificate', '')
         )
 
     def get_success_url(self):
-        return reverse_lazy('view_crt', kwargs={'pk': self.kwargs['pk']})
+        return reverse_lazy('certificates_view', kwargs={'pk': self.kwargs['pk']})
 
     def get_initial(self):
         return {'validity_period': timezone.now() + timedelta(days=settings.VALIDITY_PERIOD_CRT)}
@@ -291,30 +194,3 @@ class RecreationSiteCrt(BreadcrumbsMixin, FormView, DetailView):
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)
 
-
-class RecreationRootCrt(BreadcrumbsMixin, FormView, DetailView):
-    model = models.RootCrt
-    form_class = forms.RecreationCrt
-    template_name = 'core/certificate/recreation.html'
-    success_url = reverse_lazy('view_root_crt')
-
-    def get_breadcrumbs(self):
-        return (
-            ('Home', reverse('index')),
-            ('View root crt', reverse('view_root_crt')),
-            ('Recreation root certificate', '')
-        )
-
-    def get_object(self, queryset=None):
-        return get_object_or_404(self.model)
-
-    def form_valid(self, form):
-        self.object = models.RootCrt.objects.get()
-        path_root_dir = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)
-        directory = os.listdir(path_root_dir)
-        for file in directory:
-            os.remove(os.path.join(path_root_dir, file))
-        ca = Ca()
-        ca.generate_root_crt(form.cleaned_data, recreation=True)
-        messages.success(self.request, 'Recreation success')
-        return super().form_valid(form)

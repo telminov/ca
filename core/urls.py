@@ -1,26 +1,25 @@
 from django.conf.urls import url
 
-from core import views
+from core.views import certificates
+from core.views import root_crt
 from core import rest
 
 urlpatterns = [
-    url(r'^$', views.Index.as_view(), name='index'),
+    url(r'^$', certificates.Index.as_view(), name='index'),
+    url(r'^certificates/$', certificates.Search.as_view(), name='certificates_search'),
+    url(r'^certificates/create/$', certificates.Create.as_view(), name='certificates_create'),
+    url(r'^certificates/upload_existing/$', certificates.UploadExisting.as_view(), name='certificates_upload_existing'),
+    url(r'^certificates/(?P<pk>[0-9]+)/$', certificates.View.as_view(), name='certificates_view'),
+    url(r'^certificates/(?P<pk>[0-9]+)/recreate/$', certificates.Recreate.as_view(), name='certificates_recreate'),
+    url(r'^certificates/(?P<pk>[0-9]+)/delete/$', certificates.Delete.as_view(), name='certificates_delete'),
 
-    url(r'^root_exists/$', views.CrtExist.as_view(), name='root_crt_exists'),
-
-    url(r'^change_root_crt/$', views.IndexRootCrt.as_view(), name='index_root'),
-    url(r'^has_root_key/$', views.LoadRootCrt.as_view(), name='has_root_key'),
-    url(r'^no_root_key/$', views.GenerateRootCrt.as_view(), name='no_root_key'),
-    url(r'^view_root_crt/$', views.ViewRootCrt.as_view(), name='view_root_crt'),
-    url(r'^recreation_root_crt/$', views.RecreationRootCrt.as_view(), name='recreation_root_crt'),
-    url(r'^delete_root_crt/$', views.RootCrtDelete.as_view(), name='delete_root_crt'),
-
-    url(r'^certificates/$', views.SearchSiteCrt.as_view(), name='certificate_search'),
-    url(r'^create_crt/$', views.CreateSiteCrt.as_view(), name='create_crt'),
-    url(r'^upload_existing/$', views.LoadSiteCrt.as_view(), name='upload_existing'),
-    url(r'^view_crt/(?P<pk>[0-9]+)/$', views.ViewSiteCrt.as_view(), name='view_crt'),
-    url(r'^recreation_crt/(?P<pk>[0-9]+)/$', views.RecreationSiteCrt.as_view(), name='recreation_crt'),
-    url(r'^delete_crt/(?P<pk>[0-9]+)/$', views.SiteCrtDelete.as_view(), name='delete_crt'),
+    url(r'^root_crt/$', root_crt.CrtChoice.as_view(), name='root_crt'),
+    url(r'^root_crt/already_exists/$', root_crt.Exists.as_view(), name='root_crt_exists'),
+    url(r'^root_crt/upload_existing/$', root_crt.UploadExisting.as_view(), name='root_crt_upload_existing'),
+    url(r'^root_crt/generate_new/$', root_crt.GenerateNew.as_view(), name='root_crt_generate_new'),
+    url(r'^root_crt/view/$', root_crt.View.as_view(), name='root_crt_view'),
+    url(r'^root_crt/recreate/$', root_crt.Recreate.as_view(), name='root_crt_recreate'),
+    url(r'^root_crt/delete/$', root_crt.Delete.as_view(), name='root_crt_delete'),
 
     url(r'^api/site_crt/create/$', rest.SiteCrtCreate.as_view(), name='rest_site_crt_create'),
     url(r'^api/site_crt/$', rest.SiteCrtList.as_view(), name='rest_site_crt_list'),

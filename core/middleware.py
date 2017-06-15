@@ -22,4 +22,4 @@ class RootCrtMiddleware:
         if models.RootCrt.objects.exists():
             return response
         messages.info(request, 'Please create crt root')
-        return HttpResponseRedirect(reverse_lazy('index_root'))
+        return HttpResponseRedirect(reverse_lazy('root_crt'))
