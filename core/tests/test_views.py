@@ -280,7 +280,7 @@ class CertificatesSearch(TestCase):
         response = self.client.get(reverse('certificates_search'), {'sort': 'cn'})
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'core/certificates.html')
+        self.assertTemplateUsed(response, 'core/certificate/search.html')
 
     def test_root_crt_not_exists(self):
         models.RootCrt.objects.all().delete()
@@ -377,7 +377,7 @@ class CertificatesUploadExistingView(TestCase):
         response = self.client.get(reverse('certificates_upload_existing'))
 
         self.assertEqual(response.context['breadcrumbs'][0], ('Home', reverse('index')))
-        self.assertEqual(response.context['breadcrumbs'][1], ('Load exists certificate', ''))
+        self.assertEqual(response.context['breadcrumbs'][1], ('Load an existing certificate', ''))
 
     # в первом приближении
     def test_form_valid_files(self):

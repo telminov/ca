@@ -34,7 +34,7 @@ class Index(RedirectView):
 class Search(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
     form_class = forms.CertificatesSearch
     model = models.SiteCrt
-    template_name = 'core/search/certificates.html'
+    template_name = 'core/certificate/search.html'
     sort_params = ['cn', 'date_start', 'date_end']
 
     def get_form_kwargs(self):
@@ -83,7 +83,7 @@ class UploadExisting(BreadcrumbsMixin, FormView):
     def get_breadcrumbs(self):
         return (
             ('Home', reverse('index')),
-            ('Load exists certificate', '')
+            ('Load an existing certificate', '')
         )
 
     def form_valid(self, form):

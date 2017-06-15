@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %}{% for label in breadcrumbs.1 %}{{ label }}{% endfor %}</title>
 
     <link href="https://bootswatch.com/simplex/bootstrap.min.css" rel="stylesheet">
     <link href="{{ STATIC_URL }}core/css/custom_style.css" rel="stylesheet">
