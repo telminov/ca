@@ -27,10 +27,6 @@ class BreadcrumbsMixin(ContextMixin):
         return context
 
 
-class Index(RedirectView):
-    url = reverse_lazy('certificates_search')
-
-
 class Search(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
     form_class = forms.CertificatesSearch
     model = models.SiteCrt

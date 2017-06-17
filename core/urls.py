@@ -1,11 +1,12 @@
 from django.conf.urls import url
 
+from core.views import general
 from core.views import certificates
 from core.views import root_crt
 from core import rest
 
 urlpatterns = [
-    url(r'^$', certificates.Index.as_view(), name='index'),
+    url(r'^$', general.Index.as_view(), name='index'),
     url(r'^certificates/$', certificates.Search.as_view(), name='certificates_search'),
     url(r'^certificates/create/$', certificates.Create.as_view(), name='certificates_create'),
     url(r'^certificates/upload_existing/$', certificates.UploadExisting.as_view(), name='certificates_upload_existing'),
