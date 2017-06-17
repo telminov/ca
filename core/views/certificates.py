@@ -54,8 +54,10 @@ class Search(BreadcrumbsMixin, SortMixin, FormMixin, ListView):
 
 class Create(BreadcrumbsMixin, FormView):
     form_class = forms.CertificatesCreate
-    success_url = reverse_lazy('certificates_search')
     template_name = 'core/certificate/create.html'
+
+    def get_success_url(self):
+        return reverse_lazy('certificates_view', kwargs={'pk': self.obj.pk})
 
     def get_breadcrumbs(self):
         return (
@@ -69,9 +71,9 @@ class Create(BreadcrumbsMixin, FormView):
     def form_valid(self, form):
         ca = Ca()
         if ca.get_type_alt_names(form.cleaned_data['cn']):
-            ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'], alt_name='IP')
+            self.obj=ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'], alt_name='IP')
         else:
-            ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'])
+            self.obj=ca.generate_site_crt(form.cleaned_data['cn'], form.cleaned_data['validity_period'])
         return super().form_valid(form)
 
 
@@ -79,6 +81,9 @@ class UploadExisting(BreadcrumbsMixin, FormView):
     template_name = 'core/certificate/upload_existing.html'
     form_class = forms.CertificatesUploadExisting
     success_url = reverse_lazy('certificates_search')
+
+    def get_success_url(self):
+        return reverse_lazy('certificates_view', kwargs={'pk': self.obj.pk})
 
     def get_breadcrumbs(self):
         return (
@@ -91,7 +96,7 @@ class UploadExisting(BreadcrumbsMixin, FormView):
         if form.cleaned_data['crt_file']:
             crt_file_data = form.cleaned_data['crt_file'].read()
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_file_data)
-            models.SiteCrt.objects.create(
+            self.obj=models.SiteCrt.objects.create(
                 key=form.cleaned_data['key_file'],
                 crt=form.cleaned_data['crt_file'],
                 cn=cert.get_subject().CN,
@@ -102,7 +107,7 @@ class UploadExisting(BreadcrumbsMixin, FormView):
             cn = cert.get_subject().CN
             pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, form.cleaned_data['key_text'])
             Ca.write_cert_site(cert, pkey, cn)
-            models.SiteCrt.objects.create(
+            self.obj=models.SiteCrt.objects.create(
                 key=os.path.join(cn, cn + '.key'),
                 crt=os.path.join(cn, cn + '.crt'),
                 cn=cn,
@@ -193,4 +198,3 @@ class Recreate(BreadcrumbsMixin, FormView, DetailView):
         ca.generate_site_crt(self.object.cn, form.cleaned_data['validity_period'], self.kwargs['pk'])
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)
-
