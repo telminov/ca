@@ -32,7 +32,8 @@ class Ca:
             self._create_root_crt(self.generate_subj_recreation_root_crt(), validity_period)
         else:
             self._create_root_crt(self.generate_subj_root_crt(data), validity_period)
-            self._create_model_root_crt(data)
+            obj = self._create_model_root_crt(data)
+            return obj
 
     def generate_site_crt(self, cn, validity_period, pk=None, alt_name='DNS'):
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
@@ -45,9 +46,10 @@ class Ca:
         self._create_req_crt(path)
         self._create_site_crt(path, self.calculate_validity_period(validity_period))
         if pk:
-            self._recreation_model_site_crt(cn, pk, self.calculate_validity_period(validity_period))
+            obj = self._recreation_model_site_crt(cn, pk, self.calculate_validity_period(validity_period))
         else:
-            self._create_model_site_crt(cn, self.calculate_validity_period(validity_period))
+            obj = self._create_model_site_crt(cn, self.calculate_validity_period(validity_period))
+        return obj
 
     @staticmethod
     def get_type_alt_names(cn):
