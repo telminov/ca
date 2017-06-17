@@ -3,7 +3,7 @@ from django.conf.urls import url
 from core.views import general
 from core.views import certificates
 from core.views import root_crt
-from core import rest
+from core.views import rest
 
 urlpatterns = [
     url(r'^$', general.Index.as_view(), name='index'),
