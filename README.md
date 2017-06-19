@@ -9,7 +9,7 @@ This is a very simple certification authority center for creating and managing S
 ## Cases where this center will be useful:
 * Creating your own certification authority from scratch
 * Managing an existing certificate files
-* This centener also provides a REST API
+* This center also provides a REST API
 
 ### How to install the service:
 ```
