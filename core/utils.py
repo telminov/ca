@@ -39,9 +39,11 @@ class Ca:
             return obj
 
     def generate_site_crt(self, cn, validity_period, pk=None, alt_name='DNS'):
-        self._create_root_files()
+        if not os.path.exists(settings.MEDIA_ROOT):
+            os.mkdir(settings.MEDIA_ROOT)
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
             os.mkdir(os.path.join(settings.MEDIA_ROOT, cn))
+        self._create_root_files()
 
         path = os.path.relpath(settings.MEDIA_ROOT + '/' + cn + '/' + cn)
         self._create_pkey(path + '.key')
@@ -187,8 +189,8 @@ class Ca:
         self._eror_processing(p, path)
 
     def _create_model_root_crt(self, data):
-        key = open('media/root/rootCA.key')
-        crt = open('media/root/rootCA.crt')
+        key = open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key'))
+        crt = open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt'))
         root_crt = models.RootCrt.objects.create(
             key=key.read(),
             crt=crt.read(),
@@ -204,8 +206,8 @@ class Ca:
         return root_crt
 
     def _recreation_model_root_crt(self):
-        key = open('media/root/rootCA.key')
-        crt = open('media/root/rootCA.crt')
+        key = open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key'))
+        crt = open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt'))
         root_crt = models.RootCrt.objects.all().update(
             key=key.read(),
             crt=crt.read()
