@@ -90,10 +90,10 @@ class UploadExisting(BreadcrumbsMixin, FormView):
     def form_valid(self, form):
         current_tz = timezone.get_current_timezone()
         if form.cleaned_data['crt_file']:
-            crt_file_data = form.cleaned_data['crt_file'].read()
+            crt_file_data = form.cleaned_data['crt_file'].read().decode()
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_file_data)
             self.object = models.SiteCrt.objects.create(
-                key=form.cleaned_data['key_file'].read(),
+                key=form.cleaned_data['key_file'].read().decode(),
                 crt=crt_file_data,
                 cn=cert.get_subject().CN,
                 date_end=current_tz.localize(datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ'))

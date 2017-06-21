@@ -1,3 +1,5 @@
+from swutils.encrypt import decrypt,encrypt
+
 from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save
@@ -11,17 +13,22 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
         Token.objects.create(user=instance)
 
 
-def directory_path_root_key(instance, filename):
-    return settings.ROOT_CRT_PATH + '/rootCA.key'
+class EncryptedTextField(models.TextField):
 
+    def from_db_value(self, value, expression, connection, context):
+        if value is None:
+            return value
+        return decrypt(value, settings.SECRET_KEY.encode('utf-8'))
 
-def directory_path_root_crt(instance, filename):
-    return settings.ROOT_CRT_PATH + '/rootCA.crt'
+    def to_python(self, value):
+        if value is None:
+            return value
+        return encrypt(value, settings.SECRET_KEY.encode('utf-8'))
 
 
 class RootCrt(models.Model):
-    key = models.TextField()
-    crt = models.TextField()
+    key = EncryptedTextField()
+    crt = EncryptedTextField()
     country = models.CharField(max_length=2)
     state = models.CharField(max_length=32)
     location = models.CharField(max_length=128)
@@ -30,17 +37,9 @@ class RootCrt(models.Model):
     email = models.EmailField(blank=True, null=True, max_length=128)
 
 
-def directory_path_key(instance, filename):
-    return '{cn}/{cn}.key'.format(cn=instance.cn)
-
-
-def directory_path_crt(instance, filename):
-    return '{cn}/{cn}.crt'.format(cn=instance.cn)
-
-
 class SiteCrt(models.Model):
-    key = models.TextField()
-    crt = models.TextField()
+    key = EncryptedTextField()
+    crt = EncryptedTextField()
     cn = models.CharField(max_length=256, unique=True)
     date_start = models.DateTimeField(auto_now_add=True)
     date_end = models.DateTimeField()

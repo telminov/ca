@@ -53,8 +53,8 @@ class UploadExisting(BreadcrumbsMixin, ExistsMixin, FormView):
 
     def form_valid(self, form):
         obj = models.RootCrt()
-        cert_data = form.cleaned_data['crt'].read()
-        key_data = form.cleaned_data['key'].read()
+        cert_data = form.cleaned_data['crt'].read().decode()
+        key_data = form.cleaned_data['key'].read().decode()
         cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
         obj.crt = cert_data
         obj.key = key_data
