@@ -2,7 +2,7 @@ import datetime
 import os
 import subprocess
 import re
-from OpenSSL import crypto
+import shutil
 
 from django.utils import timezone
 from django.conf import settings
@@ -30,12 +30,16 @@ class Ca:
         validity_period = self.calculate_validity_period(data['validity_period'])
         if recreation:
             self._create_root_crt(self.generate_subj_recreation_root_crt(), validity_period)
+            self._recreation_model_root_crt()
+            self._delete_files(PATH_ROOT_CRT)
         else:
             self._create_root_crt(self.generate_subj_root_crt(data), validity_period)
             obj = self._create_model_root_crt(data)
+            self._delete_files(PATH_ROOT_CRT)
             return obj
 
     def generate_site_crt(self, cn, validity_period, pk=None, alt_name='DNS'):
+        self._create_root_files()
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
             os.mkdir(os.path.join(settings.MEDIA_ROOT, cn))
 
@@ -49,6 +53,7 @@ class Ca:
             obj = self._recreation_model_site_crt(cn, pk, self.calculate_validity_period(validity_period))
         else:
             obj = self._create_model_site_crt(cn, self.calculate_validity_period(validity_period))
+        self._delete_files(path)
         return obj
 
     @staticmethod
@@ -61,17 +66,6 @@ class Ca:
         now = datetime.datetime.now()
         validity_period = datetime.datetime.combine(date, now.time()) - now
         return validity_period.days
-
-    @staticmethod
-    def write_cert_site(cert, key, cn):
-        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
-            os.mkdir(os.path.join(settings.MEDIA_ROOT, cn))
-
-        with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.crt'), 'wb') as f:
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
-
-        with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.key'), 'wb') as f:
-            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key))
 
     @staticmethod
     def generate_subj_root_crt(data):
@@ -113,12 +107,31 @@ class Ca:
         }
         return options
 
+    def _create_root_files(self):
+        obj = models.RootCrt.objects.get()
+        os.mkdir(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH))
+        with open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key'), 'w+') as f:
+            f.write(obj.key)
+        with open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt'), 'w+') as f:
+            f.write(obj.crt)
+
+    def _delete_files(self, path):
+        path_dir = os.path.dirname(path)
+        shutil.rmtree(path_dir)
+
+        if os.path.exists(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)):
+            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH))
+
+    def _eror_processing(self, p, path):
+        if p.returncode:
+            self._delete_files(path)
+            raise CaError('Command:\n' + p.args + '\n' + 'Output:\n' + p.stderr)
+
     def _create_pkey(self, path):
         command_generate_key = 'openssl genrsa -out {path} 2048'.format(path=path)
         p = subprocess.run(command_generate_key, shell=True, stderr=subprocess.PIPE, universal_newlines=True)
 
-        if p.returncode:
-            raise CaError('Command:\n' + p.args + '\n' + 'Output:\n' + p.stderr)
+        self._eror_processing(p, path)
 
     def _create_root_crt(self, data, validity_period):
         command_generate_root_crt = 'openssl req -x509 -new -key {path_key} -days {validity_period} -out {path_crt}'.format(
@@ -132,8 +145,8 @@ class Ca:
 
         p = subprocess.run(command_generate_root_crt + command_subj_root_crt, shell=True, stderr=subprocess.PIPE,
                                    universal_newlines=True)
-        if p.returncode:
-            raise CaError('Command:\n' + p.args + '\n' + 'Output:\n' + p.stderr)
+
+        self._eror_processing(p, PATH_ROOT_CRT)
 
     def _create_extfile_crt(self, cn, alt_name):
         ext = ['authorityKeyIdentifier=keyid,issuer\n', 'basicConstraints=CA:FALSE\n',
@@ -161,8 +174,7 @@ class Ca:
 
         p = subprocess.run(command_generate_req, shell=True, stderr=subprocess.PIPE, universal_newlines=True)
 
-        if p.returncode:
-            raise CaError('Command:\n' + p.args + '\n' + 'Output:\n' + p.stderr)
+        self._eror_processing(p, path)
 
     def _create_site_crt(self, path, validity_period):
         command_generate_crt = 'openssl x509 -req -in {path_csr} -CA {path_root_crt} -CAkey {path_root_key}' \
@@ -172,13 +184,14 @@ class Ca:
 
         p = subprocess.run(command_generate_crt, shell=True, stderr=subprocess.PIPE, universal_newlines=True)
 
-        if p.returncode:
-            raise CaError('Command:\n' + p.args + '\n' + 'Output:\n' + p.stderr)
+        self._eror_processing(p, path)
 
     def _create_model_root_crt(self, data):
+        key = open('media/root/rootCA.key')
+        crt = open('media/root/rootCA.crt')
         root_crt = models.RootCrt.objects.create(
-            key=CA_KEY_FILE,
-            crt=CA_CERT_FILE,
+            key=key.read(),
+            crt=crt.read(),
             country=data['country'],
             state=data['state'],
             location=data['location'],
@@ -186,22 +199,43 @@ class Ca:
             organizational_unit_name=data['organizational_unit_name'],
             email=data['email']
         )
+        key.close()
+        crt.close()
+        return root_crt
+
+    def _recreation_model_root_crt(self):
+        key = open('media/root/rootCA.key')
+        crt = open('media/root/rootCA.crt')
+        root_crt = models.RootCrt.objects.all().update(
+            key=key.read(),
+            crt=crt.read()
+        )
+        key.close()
+        crt.close()
         return root_crt
 
     def _create_model_site_crt(self, cn, validity_period):
+        key = open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.key'))
+        crt = open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.crt'))
         site_crt = models.SiteCrt.objects.create(
-            key=os.path.join(cn, cn + '.key'),
-            crt=os.path.join(cn, cn + '.crt'),
+            key=key.read(),
+            crt=crt.read(),
             cn=cn,
             date_end=timezone.now() + datetime.timedelta(days=validity_period),
         )
+        key.close()
+        crt.close()
         return site_crt
 
     def _recreation_model_site_crt(self, cn, pk, validity_period):
+        key = open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.key'))
+        crt = open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.crt'))
         site_crt = models.SiteCrt.objects.filter(pk=pk).update(
-            key=os.path.join(cn, cn + '.key'),
-            crt=os.path.join(cn, cn + '.crt'),
+            key=key.read(),
+            crt=crt.read(),
             date_start=timezone.now(),
             date_end=timezone.now() + datetime.timedelta(days=validity_period)
         )
+        key.close()
+        crt.close()
         return site_crt

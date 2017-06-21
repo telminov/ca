@@ -7,31 +7,9 @@ from django.core.exceptions import ValidationError
 from core import models
 
 
-class RootCrt(forms.ModelForm):
-    class Meta:
-        model = models.RootCrt
-        fields = ('key', 'crt')
-        labels = {
-            'key': 'root .key file',
-            'crt': 'root .crt file'
-        }
-
-    def save(self, commit=True):
-        obj = super().save(commit=False)
-        cert_data = obj.crt.read()
-        cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
-        obj.country = cert.C
-        obj.state = cert.ST
-        obj.location = cert.L
-        obj.organization = cert.O
-        if cert.OU:
-            obj.organizational_unit_name = cert.OU
-        if cert.emailAddress:
-            obj.email = cert.emailAddress
-
-        if commit:
-            obj.save()
-        return obj
+class RootCrt(forms.Form):
+    crt = forms.FileField(label='root .crt file')
+    key = forms.FileField(label='root .key file')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -54,7 +32,7 @@ class ConfigRootCrt(forms.Form):
     location = forms.CharField(label='Location')
     organization = forms.CharField(label='Organization')
     organizational_unit_name = forms.CharField(required=False, label='Organizational_unit_name')
-    common_name = forms.CharField(label='Common name')
+    common_name = forms.CharField(required=False, label='Common name')
     email = forms.EmailField(required=False, label='Email')
     validity_period = forms.DateField(label='Certificate expiration date')
 

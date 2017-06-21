@@ -1,15 +1,15 @@
-import shutil
-import os
 from datetime import datetime, timedelta
+
 from OpenSSL import crypto
 from djutils.views.generic import SortMixin
 
+from django.http import HttpResponse
 from django.utils import timezone
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
-from django.views.generic import FormView, DetailView, DeleteView, ListView, RedirectView
+from django.views.generic import FormView, DetailView, DeleteView, ListView
 from django.views.generic.edit import FormMixin, ContextMixin
 
 from core.utils import Ca
@@ -93,19 +93,17 @@ class UploadExisting(BreadcrumbsMixin, FormView):
             crt_file_data = form.cleaned_data['crt_file'].read()
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, crt_file_data)
             self.object = models.SiteCrt.objects.create(
-                key=form.cleaned_data['key_file'],
-                crt=form.cleaned_data['crt_file'],
+                key=form.cleaned_data['key_file'].read(),
+                crt=crt_file_data,
                 cn=cert.get_subject().CN,
                 date_end=current_tz.localize(datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ'))
             )
         elif form.cleaned_data['crt_text']:
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, form.cleaned_data['crt_text'])
             cn = cert.get_subject().CN
-            pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, form.cleaned_data['key_text'])
-            Ca.write_cert_site(cert, pkey, cn)
             self.object = models.SiteCrt.objects.create(
-                key=os.path.join(cn, cn + '.key'),
-                crt=os.path.join(cn, cn + '.crt'),
+                key=form.cleaned_data['key_text'],
+                crt=form.cleaned_data['crt_text'],
                 cn=cn,
                 date_end=current_tz.localize(datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ'))
             )
@@ -125,19 +123,18 @@ class View(BreadcrumbsMixin, FormMixin, DetailView):
 
     def get_initial(self):
         crt = models.SiteCrt.objects.get(pk=self.kwargs['pk'])
-        crt_data = crt.crt.read().decode()
-        key_data = crt.key.read().decode()
+        crt_data = crt.crt
+        key_data = crt.key
         return {'crt': crt_data, 'key': key_data}
 
     def get_object(self, queryset=None):
         return get_object_or_404(self.model, pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
-        with open(self.object.crt.path, 'rt') as cert:
-            cert_data = cert.read().encode()
-            cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
-            kwargs['cert'] = cert.get_subject()
-            kwargs['crt_validity_period'] = datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ')
+        cert_data = self.object.crt.encode()
+        cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
+        kwargs['cert'] = cert.get_subject()
+        kwargs['crt_validity_period'] = datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ')
         return super().get_context_data(**kwargs)
 
 
@@ -155,11 +152,6 @@ class Delete(BreadcrumbsMixin, DeleteView):
 
     def get_object(self, queryset=None):
         return get_object_or_404(self.model, pk=self.kwargs['pk'])
-
-    def delete(self, request, *args, **kwargs):
-        path_dir = os.path.join(settings.MEDIA_ROOT, os.path.dirname(self.get_object().crt.name))
-        shutil.rmtree(path_dir)
-        return super().delete(request, *args, **kwargs)
 
 
 class Recreate(BreadcrumbsMixin, FormView, DetailView):
@@ -186,11 +178,26 @@ class Recreate(BreadcrumbsMixin, FormView, DetailView):
 
     def form_valid(self, form):
         self.object = models.SiteCrt.objects.get(pk=self.kwargs['pk'])
-        path_root_dir = os.path.join(settings.MEDIA_ROOT, os.path.dirname(self.object.crt.name))
-        directory = os.listdir(path_root_dir)
-        for file in directory:
-            os.remove(os.path.join(path_root_dir, file))
         ca = Ca()
         ca.generate_site_crt(self.object.cn, form.cleaned_data['validity_period'], self.kwargs['pk'])
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)
+
+
+class DownloadCrt(View):
+
+    def get(self, context, **response_kwargs):
+        pk = self.kwargs['pk']
+        obj = models.SiteCrt.objects.get(pk=pk)
+        res = HttpResponse(obj.crt, content_type='application/txt')
+        res['Content-Disposition'] = 'attachment; filename={}.crt'.format(obj.cn)
+        return res
+
+
+class DownloadKey(View):
+    def get(self, context, **response_kwargs):
+        pk = self.kwargs['pk']
+        obj = models.SiteCrt.objects.get(pk=pk)
+        res = HttpResponse(obj.key, content_type='application/txt')
+        res['Content-Disposition'] = 'attachment; filename={}.key'.format(obj.cn)
+        return res

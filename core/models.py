@@ -20,8 +20,8 @@ def directory_path_root_crt(instance, filename):
 
 
 class RootCrt(models.Model):
-    key = models.FileField(upload_to=directory_path_root_key)
-    crt = models.FileField(upload_to=directory_path_root_crt)
+    key = models.TextField()
+    crt = models.TextField()
     country = models.CharField(max_length=2)
     state = models.CharField(max_length=32)
     location = models.CharField(max_length=128)
@@ -39,8 +39,8 @@ def directory_path_crt(instance, filename):
 
 
 class SiteCrt(models.Model):
-    key = models.FileField(upload_to=directory_path_key)
-    crt = models.FileField(upload_to=directory_path_crt)
+    key = models.TextField()
+    crt = models.TextField()
     cn = models.CharField(max_length=256, unique=True)
     date_start = models.DateTimeField(auto_now_add=True)
     date_end = models.DateTimeField()
