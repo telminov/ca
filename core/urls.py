@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^root_crt/view/$', root_crt.View.as_view(), name='root_crt_view'),
     url(r'^root_crt/recreate/$', root_crt.Recreate.as_view(), name='root_crt_recreate'),
     url(r'^root_crt/delete/$', root_crt.Delete.as_view(), name='root_crt_delete'),
-    url(r'^root_crt/download_crt/$', root_crt.DownloadRootCrt.as_view(), name='root_crt_donwload'),
+    url(r'^root_crt/download_crt/$', root_crt.DownloadRootCrt.as_view(), name='root_crt_download'),
 
     url(r'^api/site_crt/create/$', rest.SiteCrtCreate.as_view(), name='rest_site_crt_create'),
     url(r'^api/site_crt/$', rest.SiteCrtList.as_view(), name='rest_site_crt_list'),
