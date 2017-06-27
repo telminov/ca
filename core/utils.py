@@ -3,16 +3,12 @@ import os
 import subprocess
 import re
 import shutil
+import tempfile
 
 from django.utils import timezone
 from django.conf import settings
 
 from core import models
-
-CA_KEY_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.key')
-CA_CERT_FILE = os.path.join(settings.ROOT_CRT_PATH, 'rootCA.crt')
-PATH_ROOT_KEY = os.path.relpath(os.path.join(settings.MEDIA_ROOT, CA_KEY_FILE))
-PATH_ROOT_CRT = os.path.relpath(os.path.join(settings.MEDIA_ROOT, CA_CERT_FILE))
 
 
 class CaError(Exception):
@@ -21,40 +17,46 @@ class CaError(Exception):
 
 class Ca:
     def generate_root_crt(self, data, recreation=False):
-        if not os.path.exists(settings.MEDIA_ROOT):
-            os.mkdir(settings.MEDIA_ROOT)
-        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)):
-            os.mkdir(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH))
+        dir = tempfile.mkdtemp()
 
-        self._create_pkey(PATH_ROOT_KEY)
+        if not os.path.exists(os.path.join(dir, settings.ROOT_CRT_PATH)):
+            os.mkdir(os.path.join(dir, settings.ROOT_CRT_PATH))
+
+        self.path_root_key = os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.key')
+        self.path_root_crt = os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.crt')
+
+        self._create_pkey(self.path_root_key)
         validity_period = self.calculate_validity_period(data['validity_period'])
         if recreation:
             self._create_root_crt(self.generate_subj_recreation_root_crt(), validity_period)
-            self._recreation_model_root_crt()
-            self._delete_files(PATH_ROOT_CRT)
+            self._recreation_model_root_crt(dir)
+            self._delete_files(self.path_root_crt)
         else:
             self._create_root_crt(self.generate_subj_root_crt(data), validity_period)
-            obj = self._create_model_root_crt(data)
-            self._delete_files(PATH_ROOT_CRT)
+            obj = self._create_model_root_crt(data, dir)
+            self._delete_files(self.path_root_crt)
             return obj
 
     def generate_site_crt(self, cn, validity_period, pk=None, alt_name='DNS'):
-        if not os.path.exists(settings.MEDIA_ROOT):
-            os.mkdir(settings.MEDIA_ROOT)
-        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, cn)):
-            os.mkdir(os.path.join(settings.MEDIA_ROOT, cn))
-        self._create_root_files()
+        dir = tempfile.mkdtemp()
 
-        path = os.path.relpath(settings.MEDIA_ROOT + '/' + cn + '/' + cn)
+        if not os.path.exists(os.path.join(dir, cn)):
+            os.mkdir(os.path.join(dir, cn))
+        self._create_root_files(dir)
+
+        path = os.path.join(dir + '/' + cn + '/' + cn)
+        self.path_root_key = os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.key')
+        self.path_root_crt = os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.crt')
+
         self._create_pkey(path + '.key')
-        self._create_config_crt(self.generate_subj_site_crt(cn))
-        self._create_extfile_crt(cn, alt_name)
+        self._create_config_crt(self.generate_subj_site_crt(cn), dir)
+        self._create_extfile_crt(cn, alt_name, dir)
         self._create_req_crt(path)
         self._create_site_crt(path, self.calculate_validity_period(validity_period))
         if pk:
-            obj = self._recreation_model_site_crt(cn, pk, self.calculate_validity_period(validity_period))
+            obj = self._recreation_model_site_crt(cn, pk, self.calculate_validity_period(validity_period), dir)
         else:
-            obj = self._create_model_site_crt(cn, self.calculate_validity_period(validity_period))
+            obj = self._create_model_site_crt(cn, self.calculate_validity_period(validity_period), dir)
         self._delete_files(path)
         return obj
 
@@ -109,20 +111,17 @@ class Ca:
         }
         return options
 
-    def _create_root_files(self):
+    def _create_root_files(self, dir):
         obj = models.RootCrt.objects.get()
-        os.mkdir(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH))
-        with open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key'), 'w+') as f:
+        os.mkdir(os.path.join(dir, settings.ROOT_CRT_PATH))
+        with open(os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.key'), 'w+') as f:
             f.write(obj.key)
-        with open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt'), 'w+') as f:
+        with open(os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.crt'), 'w+') as f:
             f.write(obj.crt)
 
     def _delete_files(self, path):
-        path_dir = os.path.dirname(path)
+        path_dir = os.path.dirname(os.path.dirname(path))
         shutil.rmtree(path_dir)
-
-        if os.path.exists(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)):
-            shutil.rmtree(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH))
 
     def _eror_processing(self, p, path):
         if p.returncode:
@@ -137,7 +136,7 @@ class Ca:
 
     def _create_root_crt(self, data, validity_period):
         command_generate_root_crt = 'openssl req -x509 -new -key {path_key} -days {validity_period} -out {path_crt}'.format(
-            path_key=PATH_ROOT_KEY, path_crt=PATH_ROOT_CRT, validity_period=validity_period)
+            path_key=self.path_root_key, path_crt=self.path_root_crt, validity_period=validity_period)
 
         command_subj_root_crt = ' -subj "'
         for key, value in data.items():
@@ -148,25 +147,25 @@ class Ca:
         p = subprocess.run(command_generate_root_crt + command_subj_root_crt, shell=True, stderr=subprocess.PIPE,
                                    universal_newlines=True)
 
-        self._eror_processing(p, PATH_ROOT_CRT)
+        self._eror_processing(p, self.path_root_crt)
 
-    def _create_extfile_crt(self, cn, alt_name):
+    def _create_extfile_crt(self, cn, alt_name, dir):
         ext = ['authorityKeyIdentifier=keyid,issuer\n', 'basicConstraints=CA:FALSE\n',
                'keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment\n',
                'subjectAltName = @alt_names\n', '\n', '[alt_names]\n', '{alt_name}.1 = {cn}\n'.format(alt_name=alt_name,
                                                                                                       cn=cn)]
-        with open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.ext'), 'wb') as f:
+        with open(os.path.join(dir, cn, cn + '.ext'), 'wb') as f:
             for x in ext:
                 f.write(x.encode())
 
-    def _create_config_crt(self, data):
+    def _create_config_crt(self, data, dir):
         config = ['[req]\n', 'default_bits = 2048\n', 'prompt = no\n', 'default_md = sha256\n',
                   'distinguished_name = dn\n', '\n', '[dn]\n']
         for key, value in data.items():
             if value not in ['', None] and key != 'validity_period':
                 config.append('{key}={value}\n'.format(key=key, value=value))
 
-        with open(os.path.join(settings.MEDIA_ROOT, data['CN'], data['CN'] + '.cnf'), 'wb') as f:
+        with open(os.path.join(dir, data['CN'], data['CN'] + '.cnf'), 'wb') as f:
             for x in config:
                 f.write(x.encode())
 
@@ -181,16 +180,16 @@ class Ca:
     def _create_site_crt(self, path, validity_period):
         command_generate_crt = 'openssl x509 -req -in {path_csr} -CA {path_root_crt} -CAkey {path_root_key}' \
                                ' -CAcreateserial -out {path_crt} -days {validity_period} -extfile {path_ext}'.format(
-            path_csr=path + '.csr', path_root_crt=PATH_ROOT_CRT, path_root_key=PATH_ROOT_KEY, path_crt=path + '.crt',
+            path_csr=path + '.csr', path_root_crt=self.path_root_crt, path_root_key=self.path_root_key, path_crt=path + '.crt',
             validity_period=validity_period, path_ext=path + '.ext')
 
         p = subprocess.run(command_generate_crt, shell=True, stderr=subprocess.PIPE, universal_newlines=True)
 
         self._eror_processing(p, path)
 
-    def _create_model_root_crt(self, data):
-        key = open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key'))
-        crt = open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt'))
+    def _create_model_root_crt(self, data, dir):
+        key = open(os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.key'))
+        crt = open(os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.crt'))
         root_crt = models.RootCrt.objects.create(
             key=key.read(),
             crt=crt.read(),
@@ -205,9 +204,9 @@ class Ca:
         crt.close()
         return root_crt
 
-    def _recreation_model_root_crt(self):
-        key = open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key'))
-        crt = open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt'))
+    def _recreation_model_root_crt(self, dir):
+        key = open(os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.key'))
+        crt = open(os.path.join(dir, settings.ROOT_CRT_PATH, 'rootCA.crt'))
         root_crt = models.RootCrt.objects.all().update(
             key=key.read(),
             crt=crt.read()
@@ -216,9 +215,9 @@ class Ca:
         crt.close()
         return root_crt
 
-    def _create_model_site_crt(self, cn, validity_period):
-        key = open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.key'))
-        crt = open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.crt'))
+    def _create_model_site_crt(self, cn, validity_period, dir):
+        key = open(os.path.join(dir, cn, cn + '.key'))
+        crt = open(os.path.join(dir, cn, cn + '.crt'))
         site_crt = models.SiteCrt.objects.create(
             key=key.read(),
             crt=crt.read(),
@@ -229,9 +228,9 @@ class Ca:
         crt.close()
         return site_crt
 
-    def _recreation_model_site_crt(self, cn, pk, validity_period):
-        key = open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.key'))
-        crt = open(os.path.join(settings.MEDIA_ROOT, cn, cn + '.crt'))
+    def _recreation_model_site_crt(self, cn, pk, validity_period, dir):
+        key = open(os.path.join(dir, cn, cn + '.key'))
+        crt = open(os.path.join(dir, cn, cn + '.crt'))
         site_crt = models.SiteCrt.objects.filter(pk=pk).update(
             key=key.read(),
             crt=crt.read(),

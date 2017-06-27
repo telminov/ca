@@ -40,7 +40,7 @@
                 <ul class="nav navbar-nav">
                     <li>
                         {% if root_crt %}
-                            <a href="{% url 'download_root_crt' %}" title="Download root certificate">CA.crt</a>{% endif %}
+                            <a href="{% url 'root_crt_download' %}" title="Download root certificate">CA.crt</a>{% endif %}
                     </li>
                     <li>
                         {% if breadcrumbs %}
