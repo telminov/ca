@@ -37,12 +37,13 @@ def from_text_to_files(apps, schema_editor):
             f.write(root.crt_text.encode())
             root.crt = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt')
             root.crt_text = None
+            root.save()
 
         with open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key'), 'wb') as f:
             f.write(root.key_text.encode())
             root.key = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key')
             root.key_text = None
-        root.save()
+            root.save()
 
     for site in Site.objects.all():
         if not os.path.exists(os.path.join(settings.MEDIA_ROOT, site.cn)):
@@ -52,12 +53,13 @@ def from_text_to_files(apps, schema_editor):
             f.write(site.crt_text.encode())
             site.crt = os.path.join(settings.MEDIA_ROOT, site.cn, site.cn + '.crt')
             site.crt_text = None
+            site.save()
 
         with open(os.path.join(settings.MEDIA_ROOT, site.cn, site.cn + '.key'), 'wb') as f:
             f.write(site.key_text.encode())
             site.key = os.path.join(settings.MEDIA_ROOT, site.cn, site.cn + '.key')
             site.key_text = None
-        site.save()
+            site.save()
 
 
 class Migration(migrations.Migration):
@@ -67,5 +69,21 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(from_files_to_text, reverse_code=from_text_to_files)
+        migrations.RunPython(from_files_to_text, reverse_code=from_text_to_files),
+        migrations.RemoveField(
+            model_name='rootcrt',
+            name='crt',
+        ),
+        migrations.RemoveField(
+            model_name='rootcrt',
+            name='key',
+        ),
+        migrations.RemoveField(
+            model_name='sitecrt',
+            name='crt',
+        ),
+        migrations.RemoveField(
+            model_name='sitecrt',
+            name='key',
+        ),
     ]
