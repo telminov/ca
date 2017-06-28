@@ -26,6 +26,14 @@ class EncryptedTextField(models.TextField):
         return encrypt(value, settings.SECRET_KEY.encode('utf-8'))
 
 
+def directory_path_root_key(instance, filename):
+    return settings.ROOT_CRT_PATH + '/rootCA.key'
+
+
+def directory_path_root_crt(instance, filename):
+    return settings.ROOT_CRT_PATH + '/rootCA.crt'
+
+
 class RootCrt(models.Model):
     key = EncryptedTextField()
     crt = EncryptedTextField()
@@ -35,6 +43,14 @@ class RootCrt(models.Model):
     organization = models.CharField(max_length=256)
     organizational_unit_name = models.CharField(blank=True, null=True, max_length=256)
     email = models.EmailField(blank=True, null=True, max_length=128)
+
+
+def directory_path_key(instance, filename):
+    return '{cn}/{cn}.key'.format(cn=instance.cn)
+
+
+def directory_path_crt(instance, filename):
+    return '{cn}/{cn}.crt'.format(cn=instance.cn)
 
 
 class SiteCrt(models.Model):
