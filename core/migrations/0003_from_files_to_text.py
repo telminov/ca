@@ -70,20 +70,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(from_files_to_text, reverse_code=from_text_to_files),
-        migrations.RemoveField(
-            model_name='rootcrt',
-            name='crt',
-        ),
-        migrations.RemoveField(
-            model_name='rootcrt',
-            name='key',
-        ),
-        migrations.RemoveField(
-            model_name='sitecrt',
-            name='crt',
-        ),
-        migrations.RemoveField(
-            model_name='sitecrt',
-            name='key',
-        ),
     ]
