@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import os
+import shutil
 
 from django.conf import settings
 from django.db import migrations
@@ -22,6 +23,9 @@ def from_files_to_text(apps, schema_editor):
         site.crt_text = site.crt.read().decode()
         site.save()
 
+    if os.path.exists(settings.MEDIA_ROOT):
+        shutil.rmtree(settings.MEDIA_ROOT)
+
 
 def from_text_to_files(apps, schema_editor):
     Root = apps.get_model('core', 'RootCrt')
@@ -35,13 +39,13 @@ def from_text_to_files(apps, schema_editor):
     for root in Root.objects.all():
         with open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt'), 'wb') as f:
             f.write(root.crt_text.encode())
-            root.crt = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt')
+            root.crt = os.path.relpath(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.crt'), settings.MEDIA_ROOT)
             root.crt_text = None
             root.save()
 
         with open(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key'), 'wb') as f:
             f.write(root.key_text.encode())
-            root.key = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key')
+            root.key = os.path.relpath(os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH, 'rootCA.key'), settings.MEDIA_ROOT)
             root.key_text = None
             root.save()
 
@@ -51,13 +55,13 @@ def from_text_to_files(apps, schema_editor):
 
         with open(os.path.join(settings.MEDIA_ROOT, site.cn, site.cn + '.crt'), 'wb') as f:
             f.write(site.crt_text.encode())
-            site.crt = os.path.join(settings.MEDIA_ROOT, site.cn, site.cn + '.crt')
+            site.crt = os.path.relpath(os.path.join(settings.MEDIA_ROOT, site.cn, site.cn + '.crt'), settings.MEDIA_ROOT)
             site.crt_text = None
             site.save()
 
         with open(os.path.join(settings.MEDIA_ROOT, site.cn, site.cn + '.key'), 'wb') as f:
             f.write(site.key_text.encode())
-            site.key = os.path.join(settings.MEDIA_ROOT, site.cn, site.cn + '.key')
+            site.key = os.path.relpath(os.path.join(settings.MEDIA_ROOT, site.cn, site.cn + '.key'), settings.MEDIA_ROOT)
             site.key_text = None
             site.save()
 
