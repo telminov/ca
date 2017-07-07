@@ -1,13 +1,13 @@
-import os
 from datetime import datetime
+
 from OpenSSL import crypto
 
-from django.conf import settings
 from django.contrib import messages
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
-from django.views.generic import TemplateView, CreateView, FormView, DetailView, DeleteView
+from django.views.generic import TemplateView, FormView, DetailView, DeleteView
 from django.views.generic.edit import FormMixin, ContextMixin
 
 from core.utils import Ca
@@ -40,7 +40,7 @@ class CrtChoice(ExistsMixin, TemplateView):
     template_name = 'core/root_certificate_managing/crt_choice.html'
 
 
-class UploadExisting(BreadcrumbsMixin, ExistsMixin, CreateView):
+class UploadExisting(BreadcrumbsMixin, ExistsMixin, FormView):
     form_class = forms.RootCrt
     template_name = 'core/root_certificate_managing/upload_existing.html'
     success_url = reverse_lazy('root_crt_view')
@@ -50,6 +50,26 @@ class UploadExisting(BreadcrumbsMixin, ExistsMixin, CreateView):
             ('Home', reverse('root_crt')),
             ('Load root certificate', '')
         )
+
+    def form_valid(self, form):
+        obj = models.RootCrt()
+        cert_data = form.cleaned_data['crt'].read().decode()
+        key_data = form.cleaned_data['key'].read().decode()
+        cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
+        obj.crt = cert_data
+        obj.key = key_data
+        obj.country = cert.C
+        obj.state = cert.ST
+        obj.location = cert.L
+        obj.organization = cert.O
+        if cert.OU:
+            obj.organizational_unit_name = cert.OU
+        if cert.emailAddress:
+            obj.email = cert.emailAddress
+
+        obj.save()
+
+        return super(UploadExisting, self).form_valid(form)
 
 
 class View(BreadcrumbsMixin, FormMixin, DetailView):
@@ -64,20 +84,18 @@ class View(BreadcrumbsMixin, FormMixin, DetailView):
         )
 
     def get_initial(self):
-        crt = models.RootCrt.objects.get()
-        crt_data = crt.crt.read().decode()
-        key_data = crt.key.read().decode()
+        crt_data = self.object.crt
+        key_data = self.object.key
         return {'crt': crt_data, 'key': key_data}
 
     def get_object(self, queryset=None):
         return get_object_or_404(self.model)
 
     def get_context_data(self, **kwargs):
-        with open(self.object.crt.path, 'rt') as cert:
-            cert_data = cert.read().encode()
-            cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
-            kwargs['cert'] = cert.get_subject()
-            kwargs['crt_validity_period'] = datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ')
+        cert_data = self.object.crt.encode()
+        cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data)
+        kwargs['cert'] = cert.get_subject()
+        kwargs['crt_validity_period'] = datetime.strptime(cert.get_notAfter().decode(), '%Y%m%d%H%M%SZ')
         return super().get_context_data(**kwargs)
 
 
@@ -95,13 +113,6 @@ class Delete(BreadcrumbsMixin, DeleteView):
 
     def get_object(self, queryset=None):
         return get_object_or_404(self.model)
-
-    def delete(self, request, *args, **kwargs):
-        path_root_dir = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)
-        directory = os.listdir(path_root_dir)
-        for file in directory:
-            os.remove(os.path.join(path_root_dir, file))
-        return super().delete(request, *args, **kwargs)
 
 
 class GenerateNew(BreadcrumbsMixin, ExistsMixin, FormView):
@@ -138,13 +149,15 @@ class Recreate(BreadcrumbsMixin, FormView, DetailView):
         return get_object_or_404(self.model)
 
     def form_valid(self, form):
-        self.object = models.RootCrt.objects.get()
-        path_root_dir = os.path.join(settings.MEDIA_ROOT, settings.ROOT_CRT_PATH)
-        directory = os.listdir(path_root_dir)
-        for file in directory:
-            os.remove(os.path.join(path_root_dir, file))
         ca = Ca()
         ca.generate_root_crt(form.cleaned_data, recreation=True)
         messages.success(self.request, 'Recreation success')
         return super().form_valid(form)
 
+
+class DownloadRootCrt(View):
+
+    def get(self, request, *args, **kwargs):
+        res = HttpResponse(models.RootCrt.objects.get().crt, content_type='text/plain')
+        res['Content-Disposition'] = 'attachment; filename=rootCA.crt'
+        return res

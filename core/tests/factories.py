@@ -119,8 +119,8 @@ class RootCrt(factory.django.DjangoModelFactory):
     class Meta:
         model = models.RootCrt
 
-    key = SimpleUploadedFile('rootCA.key', root_key_all_fields)
-    crt = SimpleUploadedFile('rootCA.crt', root_crt_all_fields)
+    key = root_key_all_fields.decode()
+    crt = root_crt_all_fields.decode()
     country = 'ru'
     state = 'moscow'
     location = 'moscow'
@@ -133,8 +133,8 @@ class SiteCrt(factory.django.DjangoModelFactory):
     class Meta:
         model = models.SiteCrt
 
-    key = SimpleUploadedFile('127.0.0.1.key', site_key_all_fields)
-    crt = SimpleUploadedFile('127.0.0.1.crt', site_crt_all_fields)
+    key = site_key_all_fields.decode()
+    crt = site_crt_all_fields.decode()
     cn = '127.0.0.1'
     date_start = datetime.datetime(year=2017, month=5, day=29, hour=16, minute=10, second=0, tzinfo=pytz.UTC)
     date_end = datetime.datetime(year=2019, month=5, day=29, hour=16, minute=10, second=0, tzinfo=pytz.UTC)
