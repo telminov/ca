@@ -26,8 +26,6 @@ def from_files_to_text(apps, schema_editor):
     if os.path.exists(settings.MEDIA_ROOT):
         if os.path.islink(settings.MEDIA_ROOT):
             os.unlink(settings.MEDIA_ROOT)
-            if os.path.exists(os.path.join('/', settings.MEDIA_URL)):
-                shutil.rmtree(os.path.join('/', settings.MEDIA_URL))
         else:
             shutil.rmtree(settings.MEDIA_ROOT)
 
