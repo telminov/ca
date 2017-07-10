@@ -124,7 +124,7 @@ class RootCrtForm(TestCase):
         self.client.force_login(user=self.user)
 
         response = self.client.post(reverse('root_crt_upload_existing'), {'crt': SimpleUploadedFile('test.txt', b'test'),
-                                                              'key': SimpleUploadedFile('tests.txt', b'test')})
+                                                                          'key': SimpleUploadedFile('tests.txt', b'test')})
 
         self.assertContains(response, 'Please load valid certificate and key')
 
@@ -132,9 +132,9 @@ class RootCrtForm(TestCase):
         self.client.force_login(user=self.user)
 
         response = self.client.post(reverse('root_crt_upload_existing'), {'crt': SimpleUploadedFile('rootCA.crt',
-                                                                                        root_crt_without_required_subj),
-                                                              'key': SimpleUploadedFile('rootCA.key',
-                                                                                        root_key_without_required_sub)})
+                                                                                                    root_crt_without_required_subj),
+                                                                          'key': SimpleUploadedFile('rootCA.key',
+                                                                                                    root_key_without_required_sub)})
 
         self.assertContains(response,
                             'Please enter required field in certificate: Country, State, Location, Organization')
@@ -171,8 +171,10 @@ class CertificatesUploadExistingForm(TestCase):
     def test_upload_random_files(self):
         self.client.force_login(user=self.user)
 
-        response = self.client.post(reverse('certificates_upload_existing'), {'crt_file': SimpleUploadedFile('test.txt', b'test'),
-                                                                 'key_file': SimpleUploadedFile('tests.txt', b'test')})
+        response = self.client.post(reverse('certificates_upload_existing'), {'crt_file': SimpleUploadedFile('test.txt',
+                                                                                                             b'test'),
+                                                                              'key_file': SimpleUploadedFile('tests.txt',
+                                                                                                             b'test')})
 
         self.assertContains(response, 'Please load valid certificate and key')
 
@@ -180,9 +182,9 @@ class CertificatesUploadExistingForm(TestCase):
         self.client.force_login(user=self.user)
 
         response = self.client.post(reverse('certificates_upload_existing'), {'crt_file': SimpleUploadedFile('site.crt',
-                                                                                                site_crt_not_unique_cn),
-                                                                 'key_file': SimpleUploadedFile('site.key',
-                                                                                                site_key_not_unique_cn)})
+                                                                                                             site_crt_not_unique_cn),
+                                                                              'key_file': SimpleUploadedFile('site.key',
+                                                                                                             site_key_not_unique_cn)})
 
         self.assertContains(response, 'Certificate with Common name 127.0.0.1 already exists in db')
 
@@ -197,6 +199,6 @@ class CertificatesUploadExistingForm(TestCase):
         self.client.force_login(user=self.user)
 
         response = self.client.post(reverse('certificates_upload_existing'), {'crt_text': site_crt_not_unique_cn.decode(),
-                                                                 'key_text': site_key_not_unique_cn.decode()})
+                                                                              'key_text': site_key_not_unique_cn.decode()})
 
         self.assertContains(response, 'Certificate with Common name 127.0.0.1 already exists in db')

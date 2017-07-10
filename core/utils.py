@@ -195,6 +195,12 @@ class Ca:
         if not os.path.exists(path):
             os.mkdir(path)
 
+        if isinstance(crt, bytes):
+            crt = crt.decode()
+
+        if isinstance(key, bytes):
+            key = key.decode()
+
         with open(os.path.join(path, 'crt.crt'), 'w+') as f:
             f.write(crt)
         with open(os.path.join(path, 'key.key'), 'w+') as f:
