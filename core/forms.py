@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 
 from core import models
+from core.utils import Ca
 
 
 class RootCrt(forms.Form):
@@ -14,7 +15,12 @@ class RootCrt(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         cert_data = cleaned_data.get('crt').read()
+        key_data = cleaned_data.get('key').read()
         cleaned_data.get('crt').seek(0)
+        cleaned_data.get('key').seek(0)
+        ca = Ca()
+        if not ca.check_crt_and_key(cert_data.decode(), key_data.decode()):
+            raise ValidationError('You download a different key and certificate')
         try:
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
             if not cert.C or not cert.ST or not cert.L or not cert.O:
@@ -69,12 +75,26 @@ class CertificatesUploadExisting(forms.Form):
     key_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Key')
 
     def clean(self):
+        cleaned_data = super().clean()
         crt_file = self.cleaned_data.get('crt_file')
         key_file = self.cleaned_data.get('key_file')
         crt_text = self.cleaned_data.get('crt_text')
         key_text = self.cleaned_data.get('key_text')
-        if (crt_file or key_file) and (crt_text or key_text):
-            raise ValidationError('Please fill only 2 field to choose from(File or Text)')
+        if ((crt_file or key_file) and (crt_text or key_text)) or (not (crt_file or key_file or crt_text or key_text)):
+            raise ValidationError('Please fill 2 field to choose from(File or Text)')
+        if crt_file:
+            crt = crt_file.read().decode()
+            key = key_file.read().decode()
+            crt_file.seek(0)
+            key_file.seek(0)
+        else:
+            crt = crt_text
+            key = key_text
+        ca = Ca()
+        if not ca.check_crt_and_key(crt, key):
+            raise ValidationError('You download a different key and certificate')
+
+        return cleaned_data
 
     def clean_crt_file(self):
         crt_file = self.cleaned_data.get('crt_file')

@@ -10,8 +10,8 @@
             <form enctype="multipart/form-data" method="post">
                 {% csrf_token %}
                 <div class="text-center">
-                    {% bootstrap_field form.key layout="horizontal" form_group_class="col-xs-6 has-root-key-btn" horizontal_field_class="col-xs-9" horizontal_label_class="col-xs-3" %}
                     {% bootstrap_field form.crt layout="horizontal" form_group_class="col-xs-6 has-root-key-btn" horizontal_field_class="col-xs-9" horizontal_label_class="col-xs-3" %}
+                    {% bootstrap_field form.key layout="horizontal" form_group_class="col-xs-6 has-root-key-btn" horizontal_field_class="col-xs-9" horizontal_label_class="col-xs-3" %}
                     <div class="col-xs-12">
                         <button type="submit" class="btn btn-default">Submit</button>
                     </div>
