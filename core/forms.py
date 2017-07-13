@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.exceptions import ValidationError
 
 from core import models
+from core.utils import Ca
 
 
 class RootCrt(forms.Form):
@@ -14,9 +15,14 @@ class RootCrt(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         cert_data = cleaned_data.get('crt').read()
+        key_data = cleaned_data.get('key').read()
         cleaned_data.get('crt').seek(0)
+        cleaned_data.get('key').seek(0)
         try:
             cert = crypto.load_certificate(crypto.FILETYPE_PEM, cert_data).get_subject()
+            ca = Ca()
+            if not ca.check_crt_and_key(cert_data.decode(), key_data.decode()):
+                raise ValidationError('You upload a different key and certificate')
             if not cert.C or not cert.ST or not cert.L or not cert.O:
                 msg = 'Please enter required field in certificate: Country, State, Location, Organization'
                 self.add_error('crt', msg)
@@ -69,12 +75,31 @@ class CertificatesUploadExisting(forms.Form):
     key_text = forms.CharField(widget=forms.Textarea(attrs={'rows': '6'}), required=False, label='Key')
 
     def clean(self):
+        cleaned_data = super().clean()
         crt_file = self.cleaned_data.get('crt_file')
         key_file = self.cleaned_data.get('key_file')
         crt_text = self.cleaned_data.get('crt_text')
         key_text = self.cleaned_data.get('key_text')
-        if (crt_file or key_file) and (crt_text or key_text):
-            raise ValidationError('Please fill only 2 field to choose from(File or Text)')
+        if ((crt_file or key_file) and (crt_text or key_text)) or (not (crt_file or key_file or crt_text or key_text)):
+            raise ValidationError('Please fill 2 field to choose from(File or Text)')
+
+        if self.errors:
+            return
+
+        if crt_file:
+            crt = crt_file.read()
+            key = key_file.read()
+            crt_file.seek(0)
+            key_file.seek(0)
+        else:
+            crt = crt_text
+            key = key_text
+        crypto.load_certificate(crypto.FILETYPE_PEM, crt)
+        ca = Ca()
+        if not ca.check_crt_and_key(crt, key):
+            raise ValidationError('You upload a different key and certificate')
+
+        return cleaned_data
 
     def clean_crt_file(self):
         crt_file = self.cleaned_data.get('crt_file')
@@ -92,7 +117,7 @@ class CertificatesUploadExisting(forms.Form):
                     pass
             except crypto.Error:
                 raise ValidationError('Please load valid certificate and key')
-            return crt_file
+        return crt_file
 
     def clean_crt_text(self):
         crt_text = self.cleaned_data.get('crt_text')
