@@ -28,4 +28,4 @@ class SiteCrt(serializers.ModelSerializer):
 
     @staticmethod
     def get_crt(obj):
-        return obj.crt.read()
+        return obj.crt
