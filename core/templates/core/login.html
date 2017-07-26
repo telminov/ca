@@ -16,8 +16,8 @@
             <div class="navbar-collapse collapse" id="navbar-main">
                 <ul class="nav navbar-nav">
                     <li>
-                        {% if root_crt.crt.url %}
-                            <a href="{{ root_crt.crt.url }}" title="Download root certificate">CA.crt</a>{% endif %}
+                        {% if root_crt.crt %}
+                            <a href="{% url 'root_crt_download' %}" title="Download root certificate">CA.crt</a>{% endif %}
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-center">
