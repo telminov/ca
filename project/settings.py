@@ -147,6 +147,7 @@ LOGIN_EXEMPT_URLS = (
     r'/static/',
     r'/api-token-auth/',
     r'/api/.*',
+    r'/root_crt/download_crt/',
 )
 
 BRAND_NAME = 'Your company name'
