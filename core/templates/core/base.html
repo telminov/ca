@@ -7,7 +7,7 @@
         {% if breadcrumbs %}
             {{ breadcrumbs|last|slice:"0:1"|stringformat:"s" }}
         {% else %}
-            {% block title %}{% endblock %}
+            {% block page_title %}{% endblock %}
         {% endif %}
     </title>
 
