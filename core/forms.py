@@ -60,6 +60,14 @@ class CertificatesCreate(forms.Form):
     cn = forms.CharField(required=False, label='Common name')
     validity_period = forms.DateField(label='Certificate expiration date')
 
+    def clean_cn(self):
+        cn = self.cleaned_data.get('cn')
+
+        if '_' in cn:
+            raise forms.ValidationError('Illegal character "_"')
+
+        return cn
+
     def clean(self):
         cleaned_data = super().clean()
         data = cleaned_data.get('cn')
