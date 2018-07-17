@@ -42,6 +42,14 @@ class ConfigRootCrt(forms.Form):
     email = forms.EmailField(required=False, label='Email')
     validity_period = forms.DateField(label='Certificate expiration date')
 
+    def clean_common_name(self):
+        common_name = self.cleaned_data.get('common_name')
+
+        if '_' in common_name:
+            raise forms.ValidationError('Illegal character "_"')
+
+        return common_name
+
 
 class ViewCrtText(forms.Form):
     crt = forms.CharField(widget=forms.Textarea(attrs={'rows': '8'}))
