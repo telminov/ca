@@ -12,7 +12,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
                     locales \
                     python3-pip npm
 
-RUN ln -s /usr/bin/nodejs /usr/bin/node
 
 RUN locale-gen ru_RU.UTF-8
 ENV LANG ru_RU.UTF-8
