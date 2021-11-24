@@ -1,11 +1,11 @@
 # docker build -t telminov/ca .
 # docker push telminov/ca
 
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 MAINTAINER telminov <telminov@soft-way.biz>
 
 RUN apt-get clean && apt-get update
-RUN apt-get install -y \
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
                     vim \
                     supervisor \
                     curl \

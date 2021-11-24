@@ -8,7 +8,5 @@ media/
 htmlcov/
 .coverage
 .srl
-
-core/__pycache__/
-core/migrations/__pycache__/
-project/__pycache__/
+__pycache__
+package-lock.json
