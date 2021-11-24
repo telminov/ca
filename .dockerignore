@@ -3,8 +3,10 @@ venv/
 project/local_settings.py
 *.sqlite3
 *.pyc
+__pycache__
 node_modules/
 media/
 htmlcov/
 .coverage
+package-lock.json
 

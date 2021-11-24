@@ -15,7 +15,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 
 class EncryptedTextField(models.TextField):
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection, context=None):
         if value is None:
             return value
         return decrypt(value, settings.SECRET_KEY.encode('utf-8'))
