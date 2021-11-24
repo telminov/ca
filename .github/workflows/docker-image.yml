@@ -25,8 +25,20 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: Test with pytest
+    - name: Test
       run: python ./manage.py test core
-        
+    
+    - name: docker login
+      env: 
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+         
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: docker build -t telminov/ca .
+    
+    - name: Docker push
+      run: docker push telminov/ca
+    
+    
