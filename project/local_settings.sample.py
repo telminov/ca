@@ -1,4 +1,6 @@
+import os
+
 DEBUG = False
-SECRET_KEY = '123'
-ALLOWED_HOSTS = []
-BRAND_NAME = 'Your company name'
+SECRET_KEY = os.getenv('SECRET_KEY')
+ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
+BRAND_NAME = os.getenv('BRAND_NAME', 'Your company name')
