@@ -146,13 +146,14 @@ class Ca:
         command_subj_root_crt += '"'
 
         p = subprocess.run(command_generate_root_crt + command_subj_root_crt, shell=True, stderr=subprocess.PIPE,
-                                   universal_newlines=True)
+                           universal_newlines=True)
 
         self._eror_processing(p, self.path_root_crt)
 
     def _create_extfile_crt(self, cn, alt_name, directory):
         ext = ['authorityKeyIdentifier=keyid,issuer\n', 'basicConstraints=CA:FALSE\n',
                'keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment\n',
+               'extendedKeyUsage = serverAuth, clientAuth\n',
                'subjectAltName = @alt_names\n', '\n', '[alt_names]\n', '{alt_name}.1 = {cn}\n'.format(alt_name=alt_name,
                                                                                                       cn=cn)]
         with open(os.path.join(directory, cn, cn + '.ext'), 'wb') as f:
@@ -206,11 +207,13 @@ class Ca:
         with open(os.path.join(path, 'key.key'), 'w+') as f:
             f.write(key)
 
-        p_crt = subprocess.run('openssl x509 -noout -modulus -in {}'.format(os.path.join(path, 'crt.crt')), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        p_crt = subprocess.run('openssl x509 -noout -modulus -in {}'.format(os.path.join(path, 'crt.crt')), shell=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 
         self._eror_processing(p_crt, os.path.join(path, 'crt.crt'))
 
-        p_key = subprocess.run('openssl rsa -noout -modulus -in {}'.format(os.path.join(path, 'key.key')), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        p_key = subprocess.run('openssl rsa -noout -modulus -in {}'.format(os.path.join(path, 'key.key')), shell=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 
         self._eror_processing(p_key, os.path.join(path, 'key.key'))
 
